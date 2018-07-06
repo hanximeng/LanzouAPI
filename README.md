@@ -19,9 +19,11 @@ pwd:外链密码
 
 ###直接下载：
 无密码：[https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i1aesgj&type=down](https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i1aesgj&type=down)
+
 有密码：[https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i19pnjc&type=down&pwd=1pud](https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i19pnjc&type=down&pwd=1pud)
 
 
 ###输出直链：
 无密码：[https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i1aesgj](https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i1aesgj)
+
 有密码：[https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i19pnjc&pwd=1pud](https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i19pnjc&pwd=1pud)
