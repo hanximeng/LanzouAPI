@@ -14,7 +14,9 @@ https://api.mlooc.cn/lanzou
 ## 使用方法
 
 url:蓝奏云外链链接
+
 type:是否直接下载 值：down
+
 pwd:外链密码
 
 ### 直接下载：
