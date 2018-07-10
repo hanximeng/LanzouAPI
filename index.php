@@ -5,6 +5,8 @@
  * @version 1.0.2
  * @link https://mlooc.cn
  */
+// 指定允许其他域名访问  
+header('Access-Control-Allow-Origin:*');
 	function MloocCurl($url,$method,$ifurl,$post_data){
 		$UserAgent = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36';#设置UserAgent
 		$curl = curl_init();
