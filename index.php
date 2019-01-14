@@ -2,7 +2,7 @@
 /**
  * @package Lanzou
  * @author Mlooc
- * @version 1.0.2
+ * @version 1.0.3
  * @link https://mlooc.cn
  */
 // 指定允许其他域名访问  
@@ -49,7 +49,10 @@ header('Access-Control-Allow-Origin:*');
 			"k" => $segment[4]
 			);
 		$obj = json_decode(MloocCurl("https://www.lanzous.com/ajaxm.php","post",$ifurl,$post_data));#json解析
-		if ($obj->inf == "密码不正确" && !empty($_GET['pwd'])) {
+      	if($obj->inf != "0" && !isset($_GET['pwd'])){
+			echo "该链接需要密码";
+			exit;
+		}elseif ($obj->inf != "0" && isset($_GET['pwd'])) {
 			$post_data = array(
 			"action" => $segment[1],
 			"file_id" => $segment[2],
@@ -58,9 +61,6 @@ header('Access-Control-Allow-Origin:*');
 			"p" => $_GET['pwd']
 			);
 			$obj = json_decode(MloocCurl("https://www.lanzous.com/ajaxm.php","post",$ifurl,$post_data));#json解析
-		}elseif($obj->inf == "密码不正确"){
-			echo "密码不正确";
-			exit;
 		}
 		if ($obj->dom == "") {#判断链接是否正确
 			echo "链接有误！";
