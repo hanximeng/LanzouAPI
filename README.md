@@ -1,9 +1,5 @@
 # LanzouAPI
 
-## 演示地址
-
-https://api.mlooc.cn/lanzou
-
 ## 说明
 1. 支持检测文件是否被取消
 
@@ -23,12 +19,14 @@ type:是否直接下载 值：down
 pwd:外链密码
 
 ### 直接下载：
-无密码：[https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i1aesgj&type=down](https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i1aesgj&type=down)
 
-有密码：[https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i19pnjc&type=down&pwd=1pud](https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i19pnjc&type=down&pwd=1pud)
+无密码：?url=https://www.lanzous.com/i1aesgj&type=down
+
+有密码：?url=https://www.lanzous.com/i19pnjc&type=down&pwd=1pud
 
 
 ### 输出直链：
-无密码：[https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i1aesgj](https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i1aesgj)
 
-有密码：[https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i19pnjc&pwd=1pud](https://api.mlooc.cn/lanzou/?url=https://www.lanzous.com/i19pnjc&pwd=1pud)
+无密码：?url=https://www.lanzous.com/i1aesgj
+
+有密码：?url=https://www.lanzous.com/i19pnjc&pwd=1pud
