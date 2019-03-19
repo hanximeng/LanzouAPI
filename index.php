@@ -66,7 +66,6 @@ if (strstr($softInfo, "手机Safari可在线安装") != false) {
         die;
     }
 }
-preg_match('~class="b">(.*?)<\/div>~', $softInfo, $softName);
 preg_match("~ifr2\"\sname=\"[\s\S]*?\"\ssrc=\"\/(.*?)\"~", $softInfo, $link);
 $ifurl = "https://www.lanzous.com/" . $link[1];
 $softInfo = MloocCurlGet($ifurl);
@@ -108,6 +107,7 @@ if ($type != "down") {
         array(
             'code' => 200,
             'msg' => '',
+            'name' => isset($softName[1]) ? $softName[1] : "",
             'downUrl' => $downUrl
         )
         , JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
