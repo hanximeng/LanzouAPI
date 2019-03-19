@@ -21,13 +21,13 @@ pwd:外链密码
 
 ### 直接下载：
 
-无密码：?url=https://www.lanzous.com/i1aesgj&type=down
+无密码：https://pic.mlooc.cn/aaa.php?url=https://www.lanzous.com/i1aesgj&type=down
 
-有密码：?url=https://www.lanzous.com/i19pnjc&type=down&pwd=1pud
+有密码：https://pic.mlooc.cn/aaa.php?url=https://www.lanzous.com/i19pnjc&type=down&pwd=1pud
 
 
 ### 输出直链：
 
-无密码：?url=https://www.lanzous.com/i1aesgj
+无密码：https://pic.mlooc.cn/aaa.php?url=https://www.lanzous.com/i1aesgj
 
-有密码：?url=https://www.lanzous.com/i19pnjc&pwd=1pud
+有密码：https://pic.mlooc.cn/aaa.php?url=https://www.lanzous.com/i19pnjc&pwd=1pud
