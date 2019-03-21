@@ -31,3 +31,8 @@ pwd:外链密码
 无密码：https://pic.mlooc.cn/aaa.php?url=https://www.lanzous.com/i1aesgj
 
 有密码：https://pic.mlooc.cn/aaa.php?url=https://www.lanzous.com/i19pnjc&pwd=1pud
+
+
+## 问题
+
+1. msg 返回 null 一般为服务器IP被防火墙自动屏蔽过滤，可能是短期的也可能是长期的
