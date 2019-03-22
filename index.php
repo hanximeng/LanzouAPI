@@ -2,13 +2,11 @@
 /**
  * @package Lanzou
  * @author Filmy
- * @version 1.1
+ * @version 1.2
  * @link https://mlooc.cn
  */
-
 header('Access-Control-Allow-Origin:*');
 header('Content-Type:application/json; charset=utf-8');
-
 $url = isset($_GET['url']) ? $_GET['url'] : "";
 $pwd = isset($_GET['pwd']) ? $_GET['pwd'] : "";
 $type = isset($_GET['type']) ? $_GET['type'] : "";
@@ -34,6 +32,9 @@ if (strstr($softInfo, "文件取消分享了") != false) {
     );
 }
 preg_match('~class="b">(.*?)<\/div>~', $softInfo, $softName);
+if(!isset($softName[1])){
+	preg_match('~<div class="n_box_fn">(.*?)</div>~', $softInfo, $softName);
+}
 if (strstr($softInfo, "手机Safari可在线安装") != false) {
     preg_match('~com/(\w+)~', $url, $lanzouId);
     if (!isset($lanzouId[1])) {
@@ -66,7 +67,7 @@ if (strstr($softInfo, "手机Safari可在线安装") != false) {
         die;
     }
 }
-preg_match("~ifr2\"\sname=\"[\s\S]*?\"\ssrc=\"\/(.*?)\"~", $softInfo, $link);
+preg_match("~iframe.*?name=\"[\s\S]*?\"\ssrc=\"\/(.*?)\"~", $softInfo, $link);
 $ifurl = "https://www.lanzous.com/" . $link[1];
 $softInfo = MloocCurlGet($ifurl);
 if (empty($pwd) && strstr($softInfo, "输入密码") != false) {
@@ -116,7 +117,6 @@ if ($type != "down") {
     header("Location:$downUrl");
     die;
 }
-
 function MloocCurlGet($url, $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36')
 {
     $curl = curl_init();
@@ -125,18 +125,15 @@ function MloocCurlGet($url, $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x
     if ($UserAgent != "") {
         curl_setopt($curl, CURLOPT_USERAGENT, $UserAgent);
     }
-
     #关闭SSL
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
     #返回数据不直接显示
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-
     $response = curl_exec($curl);
     curl_close($curl);
     return $response;
 }
-
 function MloocCurlPost($post_data, $url, $ifurl = '', $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36')
 {
     $curl = curl_init();
@@ -145,7 +142,6 @@ function MloocCurlPost($post_data, $url, $ifurl = '', $UserAgent = 'Mozilla/5.0 
     if ($ifurl != '') {
         curl_setopt($curl, CURLOPT_REFERER, $ifurl);
     }
-
     #关闭SSL
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
