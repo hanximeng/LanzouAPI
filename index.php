@@ -2,7 +2,7 @@
 /**
  * @package Lanzou
  * @author Filmy
- * @version 1.2
+ * @version 1.2.1
  * @link https://mlooc.cn
  */
 header('Access-Control-Allow-Origin:*');
@@ -36,20 +36,26 @@ if(!isset($softName[1])){
 	preg_match('~<div class="n_box_fn">(.*?)</div>~', $softInfo, $softName);
 }
 if (strstr($softInfo, "手机Safari可在线安装") != false) {
-    preg_match('~com/(\w+)~', $url, $lanzouId);
-    if (!isset($lanzouId[1])) {
-        die(
-        json_encode(
-            array(
-                'code' => 400,
-                'msg' => '解析失败，获取不到文件ID'
-            )
-            , JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
-        );
+  	if(strstr($softInfo, "n_file_infos") != false){
+      	$ipaInfo = MloocCurlGet($url, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
+    	preg_match('~href="(.*?)" target="_blank" class="appa"~', $ipaInfo, $ipaDownUrl);
+    }else{
+    	preg_match('~com/(\w+)~', $url, $lanzouId);
+        if (!isset($lanzouId[1])) {
+            die(
+            json_encode(
+                array(
+                    'code' => 400,
+                    'msg' => '解析失败，获取不到文件ID'
+                )
+                , JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+            );
+        }
+        $lanzouId = $lanzouId[1];
+        $ipaInfo = MloocCurlGet("https://www.lanzous.com/tp/" . $lanzouId, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
+        preg_match('~href="(.*?)" id="plist"~', $ipaInfo, $ipaDownUrl);
     }
-    $lanzouId = $lanzouId[1];
-    $ipaInfo = MloocCurlGet("https://www.lanzous.com/tp/" . $lanzouId, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
-    preg_match('~href="(.*?)" id="plist"~', $ipaInfo, $ipaDownUrl);
+    
     $ipaDownUrl = isset($ipaDownUrl[1]) ? $ipaDownUrl[1] : "";
     if ($type != "down") {
         die(
