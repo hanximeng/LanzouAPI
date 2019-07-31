@@ -100,7 +100,6 @@ if(strstr($softInfo, "function down_p(){") != false){
 	$post_data = array(
 		"action" => $segment[1],
 		"sign" => $segment[2],
-		"p" => $pwd
 	);
 	$softInfo = MloocCurlPost($post_data, "https://www.lanzous.com/ajaxm.php", $ifurl);
 }
