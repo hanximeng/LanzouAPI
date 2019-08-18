@@ -21,6 +21,7 @@ if (empty($url)) {
     );
 }
 $softInfo = MloocCurlGet($url);
+
 if (strstr($softInfo, "文件取消分享了") != false) {
     die(
     json_encode(
@@ -31,11 +32,14 @@ if (strstr($softInfo, "文件取消分享了") != false) {
         , JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
     );
 }
-preg_match('~class="b">(.*?)<\/div>~', $softInfo, $softName);
+preg_match('~><class="b">(.*?)<\/div>~', $softInfo, $softName);
 if(!isset($softName[1])){
 	preg_match('~<div class="n_box_fn".*?>(.*?)</div>~', $softInfo, $softName);
 }
 preg_match('~<div class="n_box_des".*?>(.*?)</div>~', $softInfo, $softDesc);
+if(!isset($softName[1])){
+	preg_match('~var filename = \'(.*?)\';~', $softInfo, $softName);
+}
 if (strstr($softInfo, "手机Safari可在线安装") != false) {
   	if(strstr($softInfo, "n_file_infos") != false){
       	$ipaInfo = MloocCurlGet($url, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
@@ -103,7 +107,6 @@ if(strstr($softInfo, "function down_p(){") != false){
 	);
 	$softInfo = MloocCurlPost($post_data, "https://www.lanzous.com/ajaxm.php", $ifurl);
 }
-
 $softInfo = json_decode($softInfo, true);
 if ($softInfo['zt'] != 1) {
     die(
@@ -115,18 +118,14 @@ if ($softInfo['zt'] != 1) {
         , JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
     );
 }
-$downUrl = $softInfo['dom'] . '/file/' . $softInfo['url'];
 
-$headers = [
-	'Host: vip.d0.baidupan.com',
-	'Connection: keep-alive',
-	'Upgrade-Insecure-Requests: 1',
-	'User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36',
-	'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-	'Accept-Encoding: gzip, deflate, br',
-	'Accept-Language: zh-CN,zh;q=0.9'
-];
-$downUrl = MloocCurlGetDownUrl($downUrl, $headers);
+$downUrl1 = $softInfo['dom'] . '/file/' . $softInfo['url'];
+$downUrl2 = MloocCurlGetDownUrl($downUrl1);
+if($downUrl2 == ""){
+	$downUrl = $downUrl1;
+}else{
+	$downUrl = $downUrl2;
+}
 if ($type != "down") {
     die(
     json_encode(
@@ -143,25 +142,13 @@ if ($type != "down") {
     header("Location:$downUrl");
     die;
 }
-function MloocCurlGetDownUrl($url, $headers)
+function MloocCurlGetDownUrl($url)
 {
-    $curl = curl_init();
-	curl_setopt($curl, CURLOPT_HEADER, 1);
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
-	curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-    #关闭SSL
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-    #返回数据不直接显示
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    $response = curl_exec($curl);
-	$info = curl_getinfo($curl);
-    curl_close($curl);
-	if(isset($info['url']) && $info['url'] != null && $info['url'] != ""){
-		return $info['url'];
+    $header = get_headers($url,1);
+    if(isset($header['Location'])){
+		return $header['Location'];
 	}
-    return "";
+	return "";
 }
 function MloocCurlGet($url, $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36')
 {
@@ -171,6 +158,7 @@ function MloocCurlGet($url, $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x
     if ($UserAgent != "") {
         curl_setopt($curl, CURLOPT_USERAGENT, $UserAgent);
     }
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array('X-FORWARDED-FOR:'.Rand_IP(), 'CLIENT-IP:'.Rand_IP()));
     #关闭SSL
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
@@ -188,6 +176,7 @@ function MloocCurlPost($post_data, $url, $ifurl = '', $UserAgent = 'Mozilla/5.0 
     if ($ifurl != '') {
         curl_setopt($curl, CURLOPT_REFERER, $ifurl);
     }
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array('X-FORWARDED-FOR:'.Rand_IP(), 'CLIENT-IP:'.Rand_IP()));
     #关闭SSL
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
@@ -199,3 +188,14 @@ function MloocCurlPost($post_data, $url, $ifurl = '', $UserAgent = 'Mozilla/5.0 
     curl_close($curl);
     return $response;
 }
+function Rand_IP(){
+
+    $ip2id = round(rand(600000, 2550000) / 10000);
+    $ip3id = round(rand(600000, 2550000) / 10000);
+    $ip4id = round(rand(600000, 2550000) / 10000);
+    $arr_1 = array("218","218","66","66","218","218","60","60","202","204","66","66","66","59","61","60","222","221","66","59","60","60","66","218","218","62","63","64","66","66","122","211");
+    $randarr= mt_rand(0,count($arr_1)-1);
+    $ip1id = $arr_1[$randarr];
+    return $ip1id.".".$ip2id.".".$ip3id.".".$ip4id;
+}
+?>
