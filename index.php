@@ -7,6 +7,9 @@
  */
 header('Access-Control-Allow-Origin:*');
 header('Content-Type:application/json; charset=utf-8');
+//默认UA
+$UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36';
+
 $url = isset($_GET['url']) ? $_GET['url'] : "";
 $pwd = isset($_GET['pwd']) ? $_GET['pwd'] : "";
 $type = isset($_GET['type']) ? $_GET['type'] : "";
@@ -32,7 +35,7 @@ if (strstr($softInfo, "文件取消分享了") != false) {
         , JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
     );
 }
-preg_match('~><class="b">(.*?)<\/div>~', $softInfo, $softName);
+preg_match('~class="b">(.*?)<\/div>~', $softInfo, $softName);
 if(!isset($softName[1])){
 	preg_match('~<div class="n_box_fn".*?>(.*?)</div>~', $softInfo, $softName);
 }
@@ -107,6 +110,7 @@ if(strstr($softInfo, "function down_p(){") != false){
 	);
 	$softInfo = MloocCurlPost($post_data, "https://www.lanzous.com/ajaxm.php", $ifurl);
 }
+
 $softInfo = json_decode($softInfo, true);
 if ($softInfo['zt'] != 1) {
     die(
@@ -120,7 +124,9 @@ if ($softInfo['zt'] != 1) {
 }
 
 $downUrl1 = $softInfo['dom'] . '/file/' . $softInfo['url'];
-$downUrl2 = MloocCurlGetDownUrl($downUrl1);
+//解析最终直链地址
+$downUrl2 = MloocCurlHead($downUrl1,"http://developer.store.pujirc.com",$UA,"down_ip=1; expires=Sat, 16-Nov-2019 11:42:54 GMT; path=/; domain=.baidupan.com");
+
 if($downUrl2 == ""){
 	$downUrl = $downUrl1;
 }else{
@@ -150,7 +156,8 @@ function MloocCurlGetDownUrl($url)
 	}
 	return "";
 }
-function MloocCurlGet($url, $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36')
+
+function MloocCurlGet($url, $UserAgent)
 {
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
@@ -168,7 +175,8 @@ function MloocCurlGet($url, $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x
     curl_close($curl);
     return $response;
 }
-function MloocCurlPost($post_data, $url, $ifurl = '', $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36')
+
+function MloocCurlPost($post_data, $url, $ifurl = '', $UserAgent)
 {
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
@@ -188,6 +196,34 @@ function MloocCurlPost($post_data, $url, $ifurl = '', $UserAgent = 'Mozilla/5.0 
     curl_close($curl);
     return $response;
 }
+
+//直链解析函数
+function MloocCurlHead($url,$guise,$cookie){
+$headers = array(
+	'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+	'Accept-Encoding: gzip, deflate',
+	'Accept-Language: zh-CN,zh;q=0.9',
+	'Cache-Control: no-cache',
+	'Connection: keep-alive',
+	'Pragma: no-cache',
+	'Upgrade-Insecure-Requests: 1',
+	'User-Agent: '.$UserAgent
+);
+$curl = curl_init();
+curl_setopt($curl, CURLOPT_URL, $url);
+curl_setopt($curl, CURLOPT_HTTPHEADER,$headers);
+curl_setopt($curl, CURLOPT_REFERER, $guise);
+curl_setopt($curl, CURLOPT_COOKIE , $cookie);
+curl_setopt($curl, CURLOPT_USERAGENT, $UserAgent);
+curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+curl_setopt($curl, CURLINFO_HEADER_OUT, TRUE);
+curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+$data = curl_exec($curl);
+$url=curl_getinfo($curl);
+curl_close($curl);
+return $url["redirect_url"];
+}
+
 function Rand_IP(){
 
     $ip2id = round(rand(600000, 2550000) / 10000);
