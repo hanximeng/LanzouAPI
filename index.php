@@ -125,7 +125,7 @@ if ($softInfo['zt'] != 1) {
 
 $downUrl1 = $softInfo['dom'] . '/file/' . $softInfo['url'];
 //解析最终直链地址
-$downUrl2 = MloocCurlHead($downUrl1,"http://developer.store.pujirc.com",$UA,"down_ip=1; expires=Sat, 16-Nov-2019 11:42:54 GMT; path=/; domain=.baidupan.com");
+$downUrl2 = MloocCurlHead($downUrl1,"http://developer.store.pujirc.com",$UserAgent,"down_ip=1; expires=Sat, 16-Nov-2019 11:42:54 GMT; path=/; domain=.baidupan.com");
 
 if($downUrl2 == ""){
 	$downUrl = $downUrl1;
