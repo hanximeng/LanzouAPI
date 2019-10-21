@@ -198,7 +198,7 @@ function MloocCurlPost($post_data, $url, $ifurl = '', $UserAgent)
 }
 
 //直链解析函数
-function MloocCurlHead($url,$guise,$cookie){
+function MloocCurlHead($url,$guise,$UserAgent,$cookie){
 $headers = array(
 	'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
 	'Accept-Encoding: gzip, deflate',
