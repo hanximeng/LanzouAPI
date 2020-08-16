@@ -43,6 +43,7 @@ preg_match('~<div class="n_box_des".*?>(.*?)</div>~', $softInfo, $softDesc);
 if(!isset($softName[1])){
 	preg_match('~var filename = \'(.*?)\';~', $softInfo, $softName);
 }
+
 if (strstr($softInfo, "手机Safari可在线安装") != false) {
   	if(strstr($softInfo, "n_file_infos") != false){
       	$ipaInfo = MloocCurlGet($url, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
@@ -139,7 +140,7 @@ if ($type != "down") {
         array(
             'code' => 200,
             'msg' => '',
-            'name' => isset($softName[1]) ? $softName : "",
+            'name' => isset($softName[1]) ? $softName[1] : "",
 			'desc' => isset($softDesc[1]) ? $softDesc[1] : "",
             'downUrl' => $downUrl
         )
