@@ -1,9 +1,9 @@
 <?php
 /**
  * @package Lanzou
- * @author Filmy
- * @version 1.2.2
- * @link https://mlooc.cn
+ * @author Filmy,hanximeng
+ * @version 1.2.3
+ * @link https://hanximeng.com
  */
 header('Access-Control-Allow-Origin:*');
 header('Content-Type:application/json; charset=utf-8');
@@ -35,7 +35,7 @@ if (strstr($softInfo, "文件取消分享了") != false) {
         , JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
     );
 }
-preg_match('~class="b">(.*?)<\/div>~', $softInfo, $softName);
+preg_match('~style="font-size: 30px;text-align: center;padding: 56px 0px 20px 0px;">(.*?)<\/div>~', $softInfo, $softName);
 if(!isset($softName[1])){
 	preg_match('~<div class="n_box_fn".*?>(.*?)</div>~', $softInfo, $softName);
 }
@@ -99,14 +99,15 @@ if(strstr($softInfo, "function down_p(){") != false){
 		"p" => $pwd
 	);
 	$softInfo = MloocCurlPost($post_data, "https://www.lanzous.com/ajaxm.php", $url);
+	$softName = json_decode($softInfo,JSON_UNESCAPED_UNICODE)['inf'];
 }else{
 	preg_match("~\n<iframe.*?name=\"[\s\S]*?\"\ssrc=\"\/(.*?)\"~", $softInfo, $link);
 	$ifurl = "https://www.lanzous.com/" . $link[1];
 	$softInfo = MloocCurlGet($ifurl);
-	preg_match("~'action':'(.*?)','sign':'(.*?)'~", $softInfo, $segment);
+	preg_match_all("~var pdownload = '(.*?)'~", $softInfo, $segment);
 	$post_data = array(
-		"action" => $segment[1],
-		"sign" => $segment[2],
+		"action" => 'downprocess',
+		"sign" => $segment[1][0],
 	);
 	$softInfo = MloocCurlPost($post_data, "https://www.lanzous.com/ajaxm.php", $ifurl);
 }
@@ -138,7 +139,7 @@ if ($type != "down") {
         array(
             'code' => 200,
             'msg' => '',
-            'name' => isset($softName[1]) ? $softName[1] : "",
+            'name' => isset($softName[1]) ? $softName : "",
 			'desc' => isset($softDesc[1]) ? $softDesc[1] : "",
             'downUrl' => $downUrl
         )
@@ -157,7 +158,7 @@ function MloocCurlGetDownUrl($url)
 	return "";
 }
 
-function MloocCurlGet($url, $UserAgent)
+function MloocCurlGet($url = '', $UserAgent = '')
 {
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
@@ -176,7 +177,7 @@ function MloocCurlGet($url, $UserAgent)
     return $response;
 }
 
-function MloocCurlPost($post_data, $url, $ifurl = '', $UserAgent)
+function MloocCurlPost($post_data = '', $url, $ifurl = '', $UserAgent = '')
 {
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
@@ -215,6 +216,7 @@ curl_setopt($curl, CURLOPT_HTTPHEADER,$headers);
 curl_setopt($curl, CURLOPT_REFERER, $guise);
 curl_setopt($curl, CURLOPT_COOKIE , $cookie);
 curl_setopt($curl, CURLOPT_USERAGENT, $UserAgent);
+curl_setopt($curl, CURLOPT_NOBODY, 0);
 curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 curl_setopt($curl, CURLINFO_HEADER_OUT, TRUE);
 curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
