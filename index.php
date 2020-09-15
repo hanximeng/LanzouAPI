@@ -105,7 +105,7 @@ if(strstr($softInfo, "function down_p(){") != false){
 	preg_match("~\n<iframe.*?name=\"[\s\S]*?\"\ssrc=\"\/(.*?)\"~", $softInfo, $link);
 	$ifurl = "https://www.lanzous.com/" . $link[1];
 	$softInfo = MloocCurlGet($ifurl);
-	preg_match_all("~var pdownload = '(.*?)'~", $softInfo, $segment);
+	preg_match_all("~sign':'(.*?)'~", $softInfo, $segment);
 	$post_data = array(
 		"action" => 'downprocess',
 		"sign" => $segment[1][0],
