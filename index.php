@@ -141,7 +141,7 @@ if ($type != "down") {
             'code' => 200,
             'msg' => '',
             'name' => isset($softName) ? $softName : "",
-			'filesize' => isset($softFilesize[1]) ? $softFilesize[1] : "",
+            'filesize' => isset($softFilesize[1]) ? $softFilesize[1] : "",
             'downUrl' => $downUrl
         )
         , JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
