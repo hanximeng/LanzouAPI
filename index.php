@@ -2,7 +2,7 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.2.3
+ * @version 1.2.4
  * @link https://hanximeng.com
  */
 header('Access-Control-Allow-Origin:*');
@@ -39,7 +39,7 @@ preg_match('~style="font-size: 30px;text-align: center;padding: 56px 0px 20px 0p
 if(!isset($softName[1])){
 	preg_match('~<div class="n_box_fn".*?>(.*?)</div>~', $softInfo, $softName);
 }
-preg_match('~<div class="n_box_des".*?>(.*?)</div>~', $softInfo, $softDesc);
+preg_match('~<div class="n_filesize".*?>大小：(.*?)</div>~', $softInfo, $softFilesize);
 if(!isset($softName[1])){
 	preg_match('~var filename = \'(.*?)\';~', $softInfo, $softName);
 }
@@ -93,7 +93,7 @@ if(strstr($softInfo, "function down_p(){") != false){
 			, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
 		);
 	}
-	preg_match("~'action=(.*?)&sign=(.*?)&p='\+(.*?),~", $softInfo, $segment);
+	preg_match("~action=(.*?)&sign=(.*?)&p='\+(.*?),~", $softInfo, $segment);
 	$post_data = array(
 		"action" => $segment[1],
 		"sign" => $segment[2],
@@ -140,8 +140,8 @@ if ($type != "down") {
         array(
             'code' => 200,
             'msg' => '',
-            'name' => isset($softName[1]) ? $softName[1] : "",
-			'desc' => isset($softDesc[1]) ? $softDesc[1] : "",
+            'name' => isset($softName) ? $softName : "",
+			'filesize' => isset($softFilesize[1]) ? $softFilesize[1] : "",
             'downUrl' => $downUrl
         )
         , JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
