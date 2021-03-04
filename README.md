@@ -1,5 +1,7 @@
 # LanzouAPI
 
+##演示地址：
+https://api.hanximeng.com/lanzou/
 ## 说明
 1. 支持检测文件是否被取消
 
@@ -21,14 +23,14 @@ pwd:外链密码
 
 ### 直接下载：
 
-无密码：/api.php?url=https://www.lanzous.com/i1aesgj&type=down
+无密码：/api.php?url=https://www.lanzous.com/i6th9cd&type=down
 
-有密码：/api.php?url=https://www.lanzous.com/i19pnjc&type=down&pwd=1pud
+有密码：/api.php?url=https://www.lanzous.com/i42Xxebssfg&type=down&pwd=1234
 
 
 ### 输出直链：
 
-无密码：/api.php?url=https://www.lanzous.com/i1aesgj
+无密码：/api.php?url=https://www.lanzous.com/i6th9cd
 
-有密码：/api.php?url=https://www.lanzous.com/i19pnjc&pwd=1pud
+有密码：/api.php?url=https://www.lanzous.com/i42Xxebssfg&pwd=1234
 
