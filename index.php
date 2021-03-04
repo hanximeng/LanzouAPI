@@ -100,7 +100,7 @@ if(strstr($softInfo, "function down_p(){") != false){
 		"p" => $pwd
 	);
 	$softInfo = MloocCurlPost($post_data, "https://www.lanzous.com/ajaxm.php", $url);
-	$softName = json_decode($softInfo,JSON_UNESCAPED_UNICODE)['inf'];
+	$softName[1] = json_decode($softInfo,JSON_UNESCAPED_UNICODE)['inf'];
 }else{
 	preg_match("~\n<iframe.*?name=\"[\s\S]*?\"\ssrc=\"\/(.*?)\"~", $softInfo, $link);
 	$ifurl = "https://www.lanzous.com/" . $link[1];
