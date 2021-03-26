@@ -106,6 +106,9 @@ if(strstr($softInfo, "function down_p(){") != false){
 	$ifurl = "https://www.lanzous.com/" . $link[1];
 	$softInfo = MloocCurlGet($ifurl);
 	preg_match_all("~ajaxdata,'sign':'(.*?)'~", $softInfo, $segment);
+	if(empty($segment[1][0])){
+		preg_match_all("~var pdownload = '(.*?)'~", $softInfo, $segment);
+	}
 	$post_data = array(
 		"action" => 'downprocess',
 		"sign" => $segment[1][0],
