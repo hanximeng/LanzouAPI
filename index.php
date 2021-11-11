@@ -107,7 +107,7 @@ if(strstr($softInfo, "function down_p(){") != false){
 	$softInfo = MloocCurlGet($ifurl);
 	preg_match_all("~pdownload = '(.*?)'~", $softInfo, $segment);
 	if(empty($segment[1][0])){
-		preg_match_all("~var pdownload = '(.*?)'~", $softInfo, $segment);
+		preg_match_all("~ispostdowns = '(.*?)'~", $softInfo, $segment);
 	}
 	$post_data = array(
 		"action" => 'downprocess',
