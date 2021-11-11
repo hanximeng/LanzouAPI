@@ -2,7 +2,7 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.2.4
+ * @version 1.2.5
  * @link https://hanximeng.com
  */
 header('Access-Control-Allow-Origin:*');
@@ -61,7 +61,7 @@ if (strstr($softInfo, "手机Safari可在线安装") != false) {
             );
         }
         $lanzouId = $lanzouId[1];
-        $ipaInfo = MloocCurlGet("https://www.lanzous.com/tp/" . $lanzouId, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
+        $ipaInfo = MloocCurlGet("https://www.lanzoux.com/tp/" . $lanzouId, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
         preg_match('~href="(.*?)" id="plist"~', $ipaInfo, $ipaDownUrl);
     }
     
@@ -99,21 +99,22 @@ if(strstr($softInfo, "function down_p(){") != false){
 		"sign" => $segment[2],
 		"p" => $pwd
 	);
-	$softInfo = MloocCurlPost($post_data, "https://www.lanzous.com/ajaxm.php", $url);
+	$softInfo = MloocCurlPost($post_data, "https://www.lanzoux.com/ajaxm.php", $url);
 	$softName[1] = json_decode($softInfo,JSON_UNESCAPED_UNICODE)['inf'];
 }else{
 	preg_match("~\n<iframe.*?name=\"[\s\S]*?\"\ssrc=\"\/(.*?)\"~", $softInfo, $link);
-	$ifurl = "https://www.lanzous.com/" . $link[1];
+	$ifurl = "https://www.lanzoux.com/" . $link[1];
 	$softInfo = MloocCurlGet($ifurl);
-	preg_match_all("~ajaxdata,'sign':'(.*?)'~", $softInfo, $segment);
+	preg_match_all("~pdownload = '(.*?)'~", $softInfo, $segment);
 	if(empty($segment[1][0])){
 		preg_match_all("~var pdownload = '(.*?)'~", $softInfo, $segment);
 	}
 	$post_data = array(
 		"action" => 'downprocess',
+		"signs"=>"?ctdf",
 		"sign" => $segment[1][0],
 	);
-	$softInfo = MloocCurlPost($post_data, "https://www.lanzous.com/ajaxm.php", $ifurl);
+	$softInfo = MloocCurlPost($post_data, "https://www.lanzoux.com/ajaxm.php", $ifurl);
 }
 
 $softInfo = json_decode($softInfo, true);
@@ -143,7 +144,7 @@ if ($type != "down") {
         array(
             'code' => 200,
             'msg' => '',
-            'name' => isset($softName) ? $softName : "",
+            'name' => isset($softName[1]) ? $softName[1] : "",
             'filesize' => isset($softFilesize[1]) ? $softFilesize[1] : "",
             'downUrl' => $downUrl
         )
