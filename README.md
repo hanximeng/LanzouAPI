@@ -14,6 +14,8 @@ https://api.hanximeng.com/lanzou/
 
 5. 解析最终直链
 
+6. 自动识别旧版链接替换为新版并解析
+
 ## 使用方法
 
 url:蓝奏云外链链接
