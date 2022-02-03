@@ -110,6 +110,8 @@ if(strstr($softInfo, "function down_p(){") != false){
 	preg_match_all("~pdownload = '(.*?)'~", $softInfo, $segment);
 	if(empty($segment[1][0])){
 		preg_match_all("~ispostdowns = '(.*?)'~", $softInfo, $segment);
+	}elseif(empty($segment[1][0])){
+		preg_match_all("~'sign':'(.*?)'~", $softInfo, $segment);
 	}
 	$post_data = array(
 		"action" => 'downprocess',
