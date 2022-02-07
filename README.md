@@ -1,5 +1,5 @@
 # LanzouAPI
-
+<a href="https://github.com/hanximeng/LanzouAPI/archive/refs/heads/master.zip">下载源码</a>
 ## 演示地址：
 https://api.hanximeng.com/lanzou/
 
