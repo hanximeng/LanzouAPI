@@ -2,7 +2,8 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.2.5
+ * @version 1.2.6
+ * @Date 2022-03-03
  * @link https://hanximeng.com
  */
 header('Access-Control-Allow-Origin:*');
@@ -10,8 +11,6 @@ header('Content-Type:application/json; charset=utf-8');
 //默认UA
 $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36';
 
-//一个简单的链接处理
-$_GET['url']='https://www.lanzoux.com/'.explode('.com/',$_GET['url'])['1'];
 $url = isset($_GET['url']) ? $_GET['url'] : "";
 $pwd = isset($_GET['pwd']) ? $_GET['pwd'] : "";
 $type = isset($_GET['type']) ? $_GET['type'] : "";
@@ -25,6 +24,8 @@ if (empty($url)) {
         , JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
     );
 }
+//一个简单的链接处理
+$url='https://www.lanzoux.com/'.explode('.com/',$url);
 $softInfo = MloocCurlGet($url);
 
 if (strstr($softInfo, "文件取消分享了") != false) {
@@ -110,7 +111,8 @@ if(strstr($softInfo, "function down_p(){") != false){
 	preg_match_all("~pdownload = '(.*?)'~", $softInfo, $segment);
 	if(empty($segment[1][0])){
 		preg_match_all("~ispostdowns = '(.*?)'~", $softInfo, $segment);
-	}elseif(empty($segment[1][0])){
+	}
+	if(empty($segment[1][0])){
 		preg_match_all("~'sign':'(.*?)'~", $softInfo, $segment);
 	}
 	$post_data = array(
@@ -186,7 +188,7 @@ function MloocCurlGet($url = '', $UserAgent = '')
     return $response;
 }
 
-function MloocCurlPost($post_data = '', $url, $ifurl = '', $UserAgent = '')
+function MloocCurlPost($post_data = '', $url = '', $ifurl = '', $UserAgent = '')
 {
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
