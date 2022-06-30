@@ -2,7 +2,7 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.2.6
+ * @version 1.2.7
  * @Date 2022-03-03
  * @link https://hanximeng.com
  */
@@ -25,7 +25,7 @@ if (empty($url)) {
     );
 }
 //一个简单的链接处理
-$url='https://www.lanzoux.com/'.explode('.com/',$url)['1'];
+$url='https://www.lanzouf.com/'.explode('.com/',$url)['1'];
 $softInfo = MloocCurlGet($url);
 
 if (strstr($softInfo, "文件取消分享了") != false) {
@@ -64,7 +64,7 @@ if (strstr($softInfo, "手机Safari可在线安装") != false) {
             );
         }
         $lanzouId = $lanzouId[1];
-        $ipaInfo = MloocCurlGet("https://www.lanzoux.com/tp/" . $lanzouId, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
+        $ipaInfo = MloocCurlGet("https://www.lanzouf.com/tp/" . $lanzouId, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
         preg_match('~href="(.*?)" id="plist"~', $ipaInfo, $ipaDownUrl);
     }
     
@@ -102,25 +102,25 @@ if(strstr($softInfo, "function down_p(){") != false){
 		"sign" => $segment[2],
 		"p" => $pwd
 	);
-	$softInfo = MloocCurlPost($post_data, "https://www.lanzoux.com/ajaxm.php", $url);
+	$softInfo = MloocCurlPost($post_data, "https://www.lanzouf.com/ajaxm.php", $url);
 	$softName[1] = json_decode($softInfo,JSON_UNESCAPED_UNICODE)['inf'];
 }else{
 	preg_match("~\n<iframe.*?name=\"[\s\S]*?\"\ssrc=\"\/(.*?)\"~", $softInfo, $link);
-	$ifurl = "https://www.lanzoux.com/" . $link[1];
+	$ifurl = "https://www.lanzouf.com/" . $link[1];
 	$softInfo = MloocCurlGet($ifurl);
 	preg_match_all("~pdownload = '(.*?)'~", $softInfo, $segment);
-	if(empty($segment[1][0])){
+	if(empty($segment[1][1])){
 		preg_match_all("~ispostdowns = '(.*?)'~", $softInfo, $segment);
 	}
-	if(empty($segment[1][0])){
+	if(empty($segment[1][1])){
 		preg_match_all("~'sign':'(.*?)'~", $softInfo, $segment);
 	}
 	$post_data = array(
 		"action" => 'downprocess',
 		"signs"=>"?ctdf",
-		"sign" => $segment[1][0],
+		"sign" => $segment[1][1],
 	);
-	$softInfo = MloocCurlPost($post_data, "https://www.lanzoux.com/ajaxm.php", $ifurl);
+	$softInfo = MloocCurlPost($post_data, "https://www.lanzouf.com/ajaxm.php", $ifurl);
 }
 
 $softInfo = json_decode($softInfo, true);
