@@ -2,8 +2,8 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.2.7
- * @Date 2022-03-03
+ * @version 1.2.8
+ * @Date 2022-07-09
  * @link https://hanximeng.com
  */
 header('Access-Control-Allow-Origin:*');
