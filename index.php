@@ -118,7 +118,7 @@ if(strstr($softInfo, "function down_p(){") != false){
 	$post_data = array(
 		"action" => 'downprocess',
 		"signs"=>"?ctdf",
-		"sign" => $segment[1][1],
+		"sign" => $segment[1][2],
 	);
 	$softInfo = MloocCurlPost($post_data, "https://www.lanzouf.com/ajaxm.php", $ifurl);
 }
