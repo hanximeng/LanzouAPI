@@ -2,8 +2,8 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.2.8
- * @Date 2022-07-09
+ * @version 1.2.9
+ * @Date 2022-07-15
  * @link https://hanximeng.com
  */
 header('Access-Control-Allow-Origin:*');
@@ -74,7 +74,7 @@ if (strstr($softInfo, "手机Safari可在线安装") != false) {
         json_encode(
             array(
                 'code' => 200,
-                'msg' => '',
+                'msg' => '解析成功',
                 'name' => isset($softName[1]) ? $softName[1] : "",
                 'downUrl' => $ipaDownUrl
             )
@@ -108,17 +108,11 @@ if(strstr($softInfo, "function down_p(){") != false){
 	preg_match("~\n<iframe.*?name=\"[\s\S]*?\"\ssrc=\"\/(.*?)\"~", $softInfo, $link);
 	$ifurl = "https://www.lanzouf.com/" . $link[1];
 	$softInfo = MloocCurlGet($ifurl);
-	preg_match_all("~pdownload = '(.*?)'~", $softInfo, $segment);
-	if(empty($segment[1][1])){
-		preg_match_all("~ispostdowns = '(.*?)'~", $softInfo, $segment);
-	}
-	if(empty($segment[1][1])){
-		preg_match_all("~'sign':'(.*?)'~", $softInfo, $segment);
-	}
+	preg_match_all("~sign = '(.*?)'~", $softInfo, $segment);
 	$post_data = array(
 		"action" => 'downprocess',
 		"signs"=>"?ctdf",
-		"sign" => $segment[1][2],
+		"sign" => $segment[1][0],
 	);
 	$softInfo = MloocCurlPost($post_data, "https://www.lanzouf.com/ajaxm.php", $ifurl);
 }
@@ -149,7 +143,7 @@ if ($type != "down") {
     json_encode(
         array(
             'code' => 200,
-            'msg' => '',
+            'msg' => '解析成功',
             'name' => isset($softName[1]) ? $softName[1] : "",
             'filesize' => isset($softFilesize[1]) ? $softFilesize[1] : "",
             'downUrl' => $downUrl
