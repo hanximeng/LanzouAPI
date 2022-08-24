@@ -2,8 +2,8 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.2.9
- * @Date 2022-08-15
+ * @version 1.2.91
+ * @Date 2022-08-24
  * @link https://hanximeng.com
  */
 header('Access-Control-Allow-Origin:*');
@@ -69,7 +69,7 @@ if (strstr($softInfo, "手机Safari可在线安装") != false) {
 		}
 		$lanzouId = $lanzouId[1];
 		$ipaInfo = MloocCurlGet("https://www.lanzouy.com/tp/" . $lanzouId, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
-		preg_match('~href="(.*?)" id="plist"~', $ipaInfo, $ipaDownUrl);
+		preg_match("~nmousedows = '(.*?)'~", $ipaInfo, $ipaDownUrl);
 	}
 	$ipaDownUrl = isset($ipaDownUrl[1]) ? $ipaDownUrl[1] : "";
 	if ($type != "down") {
