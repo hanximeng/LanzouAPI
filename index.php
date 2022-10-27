@@ -2,8 +2,8 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.2.91
- * @Date 2022-08-24
+ * @version 1.2.92
+ * @Date 2022-10-28
  * @link https://hanximeng.com
  */
 header('Access-Control-Allow-Origin:*');
@@ -117,11 +117,11 @@ if(strstr($softInfo, "function down_p(){") != false) {
 	}
 	$ifurl = "https://www.lanzouy.com/" . $link[1];
 	$softInfo = MloocCurlGet($ifurl);
-	preg_match_all("~sign = '(.*?)'~", $softInfo, $segment);
+	preg_match_all("~signs = '(.*?)'~", $softInfo, $segment);
 	$post_data = array(
 			"action" => 'downprocess',
 			"signs"=>"?ctdf",
-			"sign" => $segment[1][0],
+			"sign" => $segment[1][1],
 		);
 	$softInfo = MloocCurlPost($post_data, "https://www.lanzouy.com/ajaxm.php", $ifurl);
 }
