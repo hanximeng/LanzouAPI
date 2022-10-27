@@ -25,7 +25,7 @@ if (empty($url)) {
 	    );
 }
 //一个简单的链接处理
-$url='https://www.lanzouy.com/'.explode('.com/',$url)['1'];
+$url='https://www.lanzoue.com/'.explode('.com/',$url)['1'];
 $softInfo = MloocCurlGet($url);
 //判断文件链接是否失效
 if (strstr($softInfo, "文件取消分享了") != false) {
@@ -68,7 +68,7 @@ if (strstr($softInfo, "手机Safari可在线安装") != false) {
 			            );
 		}
 		$lanzouId = $lanzouId[1];
-		$ipaInfo = MloocCurlGet("https://www.lanzouy.com/tp/" . $lanzouId, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
+		$ipaInfo = MloocCurlGet("https://www.lanzoue.com/tp/" . $lanzouId, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
 		preg_match("~nmousedows = '(.*?)'~", $ipaInfo, $ipaDownUrl);
 	}
 	$ipaDownUrl = isset($ipaDownUrl[1]) ? $ipaDownUrl[1] : "";
@@ -106,7 +106,7 @@ if(strstr($softInfo, "function down_p(){") != false) {
 			"sign" => $segment[2],
 			"p" => $pwd
 		);
-	$softInfo = MloocCurlPost($post_data, "https://www.lanzouy.com/ajaxm.php", $url);
+	$softInfo = MloocCurlPost($post_data, "https://www.lanzoue.com/ajaxm.php", $url);
 	$softName[1] = json_decode($softInfo,JSON_UNESCAPED_UNICODE)['inf'];
 } else {
 	//不带密码的链接处理
@@ -115,7 +115,7 @@ if(strstr($softInfo, "function down_p(){") != false) {
 	if(empty($link[1])) {
 		preg_match("~<iframe.*?name=\"[\s\S]*?\"\ssrc=\"\/(.*?)\"~", $softInfo, $link);
 	}
-	$ifurl = "https://www.lanzouy.com/" . $link[1];
+	$ifurl = "https://www.lanzoue.com/" . $link[1];
 	$softInfo = MloocCurlGet($ifurl);
 	preg_match_all("~signs = '(.*?)'~", $softInfo, $segment);
 	$post_data = array(
@@ -123,7 +123,7 @@ if(strstr($softInfo, "function down_p(){") != false) {
 			"signs"=>"?ctdf",
 			"sign" => $segment[1][1],
 		);
-	$softInfo = MloocCurlPost($post_data, "https://www.lanzouy.com/ajaxm.php", $ifurl);
+	$softInfo = MloocCurlPost($post_data, "https://www.lanzoue.com/ajaxm.php", $ifurl);
 }
 //其他情况下的信息输出
 $softInfo = json_decode($softInfo, true);
