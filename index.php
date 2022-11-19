@@ -117,7 +117,7 @@ if(strstr($softInfo, "function down_p(){") != false) {
 	}
 	$ifurl = "https://www.lanzoue.com/" . $link[1];
 	$softInfo = MloocCurlGet($ifurl);
-	preg_match_all("~signs = '(.*?)'~", $softInfo, $segment);
+	preg_match_all("~s_sign = '(.*?)'~", $softInfo, $segment);
 	$post_data = array(
 			"action" => 'downprocess',
 			"signs"=>"?ctdf",
