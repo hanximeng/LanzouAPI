@@ -2,8 +2,8 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.2.93
- * @Date 2022-12-11
+ * @version 1.2.94
+ * @Date 2022-12-12
  * @link https://hanximeng.com
  */
 header('Access-Control-Allow-Origin:*');
@@ -50,6 +50,9 @@ if(!isset($softFilesize[1])) {
 if(!isset($softName[1])) {
 	preg_match('~var filename = \'(.*?)\';~', $softInfo, $softName);
 }
+if(!isset($softName[1])) {
+	preg_match('~div class="b"><span>(.*?)</span></div>~', $softInfo, $softName);
+}
 //判断文件是否是IOS的安装包
 if (strstr($softInfo, "手机Safari可在线安装") != false) {
 	if(strstr($softInfo, "n_file_infos") != false) {
@@ -69,7 +72,7 @@ if (strstr($softInfo, "手机Safari可在线安装") != false) {
 		}
 		$lanzouId = $lanzouId[1];
 		$ipaInfo = MloocCurlGet("https://www.lanzoue.com/tp/" . $lanzouId, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
-		preg_match("~nmousedows = '(.*?)'~", $ipaInfo, $ipaDownUrl);
+		preg_match("~appitem = '(.*?)'~", $ipaInfo, $ipaDownUrl);
 	}
 	$ipaDownUrl = isset($ipaDownUrl[1]) ? $ipaDownUrl[1] : "";
 	if ($type != "down") {
