@@ -2,8 +2,8 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.2.92
- * @Date 2022-10-28
+ * @version 1.2.93
+ * @Date 2022-12-11
  * @link https://hanximeng.com
  */
 header('Access-Control-Allow-Origin:*');
@@ -140,7 +140,7 @@ if ($softInfo['zt'] != 1) {
 //拼接链接
 $downUrl1 = $softInfo['dom'] . '/file/' . $softInfo['url'];
 //解析最终直链地址
-$downUrl2 = MloocCurlHead($downUrl1,"http://developer.store.pujirc.com",$UserAgent,"down_ip=1; expires=Sat, 16-Nov-2019 11:42:54 GMT; path=/; domain=.baidupan.com");
+$downUrl2 = MloocCurlHead($downUrl1,"https://developer.lanzoug.com",$UserAgent,"down_ip=1; expires=Sat, 16-Nov-2019 11:42:54 GMT; path=/; domain=.baidupan.com");
 //判断最终链接是否获取成功，如未成功则使用原链接
 if($downUrl2 == "") {
 	$downUrl = $downUrl1;
@@ -232,6 +232,8 @@ function MloocCurlHead($url,$guise,$UserAgent,$cookie) {
 	curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 	curl_setopt($curl, CURLINFO_HEADER_OUT, TRUE);
 	curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+	//超时设置，默认为10秒
+	curl_setopt($curl, CURLOPT_TIMEOUT, 10);
 	$data = curl_exec($curl);
 	$url=curl_getinfo($curl);
 	curl_close($curl);
