@@ -53,44 +53,6 @@ if(!isset($softName[1])) {
 if(!isset($softName[1])) {
 	preg_match('~div class="b"><span>(.*?)</span></div>~', $softInfo, $softName);
 }
-//判断文件是否是IOS的安装包
-if (strstr($softInfo, "手机Safari可在线安装") != false) {
-	if(strstr($softInfo, "n_file_infos") != false) {
-		$ipaInfo = MloocCurlGet($url, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
-		preg_match('~href="(.*?)" target="_blank" class="appa"~', $ipaInfo, $ipaDownUrl);
-	} else {
-		preg_match('~com/(\w+)~', $url, $lanzouId);
-		if (!isset($lanzouId[1])) {
-			die(
-			            json_encode(
-			                array(
-			                    'code' => 400,
-			                    'msg' => '解析失败，获取不到文件ID'
-			                )
-			                , JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
-			            );
-		}
-		$lanzouId = $lanzouId[1];
-		$ipaInfo = MloocCurlGet("https://www.lanzoue.com/tp/" . $lanzouId, 'Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1');
-		preg_match("~appitem = '(.*?)'~", $ipaInfo, $ipaDownUrl);
-	}
-	$ipaDownUrl = isset($ipaDownUrl[1]) ? $ipaDownUrl[1] : "";
-	if ($type != "down") {
-		die(
-		        json_encode(
-		            array(
-		                'code' => 200,
-		                'msg' => '解析成功',
-		                'name' => isset($softName[1]) ? $softName[1] : "",
-		                'downUrl' => $ipaDownUrl
-		            )
-		            , JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
-		        );
-	} else {
-		header("Location:$ipaDownUrl");
-		die;
-	}
-}
 //带密码的链接的处理
 if(strstr($softInfo, "function down_p(){") != false) {
 	if(empty($pwd)) {
