@@ -2,8 +2,8 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.2.94
- * @Date 2022-12-12
+ * @version 1.2.95
+ * @Date 2022-12-26
  * @link https://hanximeng.com
  */
 header('Access-Control-Allow-Origin:*');
@@ -65,10 +65,10 @@ if(strstr($softInfo, "function down_p(){") != false) {
 					, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
 				);
 	}
-	preg_match("~action=(.*?)&sign=(.*?)&p='\+(.*?),~", $softInfo, $segment);
+	preg_match_all("~action=(.*?)&sign=(.*?)&p='\+(.*?),~", $softInfo, $segment);
 	$post_data = array(
-			"action" => $segment[1],
-			"sign" => $segment[2],
+			"action" => 'downprocess',
+			"sign" => $segment[2][1],
 			"p" => $pwd
 		);
 	$softInfo = MloocCurlPost($post_data, "https://www.lanzoue.com/ajaxm.php", $url);
@@ -82,11 +82,11 @@ if(strstr($softInfo, "function down_p(){") != false) {
 	}
 	$ifurl = "https://www.lanzoue.com/" . $link[1];
 	$softInfo = MloocCurlGet($ifurl);
-	preg_match_all("~s_sign = '(.*?)'~", $softInfo, $segment);
+	preg_match_all("~sign':'(.*?)'~", $softInfo, $segment);
 	$post_data = array(
 			"action" => 'downprocess',
 			"signs"=>"?ctdf",
-			"sign" => $segment[1][1],
+			"sign" => $segment[1][0],
 		);
 	$softInfo = MloocCurlPost($post_data, "https://www.lanzoue.com/ajaxm.php", $ifurl);
 }
