@@ -65,7 +65,7 @@ if(strstr($softInfo, "function down_p(){") != false) {
 					, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
 				);
 	}
-	preg_match_all("~skdklds = 'skdklds = '(.*?)';~", $softInfo, $segment);
+	preg_match_all("~skdklds = '(.*?)';~", $softInfo, $segment);
 	$post_data = array(
 			"action" => 'downprocess',
 			"sign" => $segment[1][0],
