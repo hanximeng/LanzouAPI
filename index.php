@@ -65,10 +65,10 @@ if(strstr($softInfo, "function down_p(){") != false) {
 					, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
 				);
 	}
-	preg_match_all("~action=(.*?)&sign=(.*?)&p='\+(.*?),~", $softInfo, $segment);
+	preg_match_all("~skdklds = 'skdklds = '(.*?)';~", $softInfo, $segment);
 	$post_data = array(
 			"action" => 'downprocess',
-			"sign" => $segment[2][1],
+			"sign" => $segment[1][0],
 			"p" => $pwd
 		);
 	$softInfo = MloocCurlPost($post_data, "https://www.lanzoue.com/ajaxm.php", $url);
@@ -82,11 +82,11 @@ if(strstr($softInfo, "function down_p(){") != false) {
 	}
 	$ifurl = "https://www.lanzoue.com/" . $link[1];
 	$softInfo = MloocCurlGet($ifurl);
-	preg_match_all("~sign':'(.*?)'~", $softInfo, $segment);
+	preg_match_all("~sasign = '(.*?)'~", $softInfo, $segment);
 	$post_data = array(
 			"action" => 'downprocess',
 			"signs"=>"?ctdf",
-			"sign" => $segment[1][0],
+			"sign" => $segment[1][1],
 		);
 	$softInfo = MloocCurlPost($post_data, "https://www.lanzoue.com/ajaxm.php", $ifurl);
 }
