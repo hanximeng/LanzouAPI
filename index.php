@@ -82,11 +82,11 @@ if(strstr($softInfo, "function down_p(){") != false) {
 	}
 	$ifurl = "https://www.lanzoue.com/" . $link[1];
 	$softInfo = MloocCurlGet($ifurl);
-	preg_match_all("~sasign = '(.*?)'~", $softInfo, $segment);
+	preg_match_all("~'sign':'(.*?)'~", $softInfo, $segment);
 	$post_data = array(
 			"action" => 'downprocess',
 			"signs"=>"?ctdf",
-			"sign" => $segment[1][1],
+			"sign" => $segment[1][0],
 		);
 	$softInfo = MloocCurlPost($post_data, "https://www.lanzoue.com/ajaxm.php", $ifurl);
 }
