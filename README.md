@@ -37,3 +37,10 @@ pwd:外链密码
 
 有密码：https://api.hanximeng.com/lanzou/?url=https://www.lanzous.com/i42Xxebssfg&pwd=1234
 
+## 反馈
+Github或许无法及时回复处理，以下为其余联系方式。
+
+### Gmail
+hanximeng.com@gmail.com
+### QQ群
+549522943
