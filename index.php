@@ -112,6 +112,8 @@ if($downUrl2 == "") {
 } else {
 	$downUrl = $downUrl2;
 }
+//2024-12-03 修复pid参数可能导致的服务器ip地址泄露
+$downUrl=preg_replace('/pid=(.*?.)&/', '', $downUrl);
 //判断是否是直接下载
 if ($type != "down") {
 	die(
