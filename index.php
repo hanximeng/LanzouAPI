@@ -2,8 +2,8 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.2.98
- * @Date 2024-12-17
+ * @version 1.2.99
+ * @Date 2025-03-17
  * @link https://hanximeng.com
  */
 header('Access-Control-Allow-Origin:*');
@@ -65,15 +65,15 @@ if(strstr($softInfo, "function down_p(){") != false) {
 					, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
 				);
 	}
-	preg_match_all("~skdklds = '(.*?)';~", $softInfo, $segment);
+	preg_match_all("~ bcdf = '(.*?)';~", $softInfo, $segment);
+	preg_match_all("/ajaxm\.php\?file=(\d+)/", $softInfo, $ajaxm);
 	$post_data = array(
 			"action" => 'downprocess',
 			"sign" => $segment[1][0],
 			"p" => $pwd,
 			"kd" => 1
 		);
-	preg_match_all("/ajaxm\.php\?file=(\d+)/", $softInfo, $ajaxm);
-	$softInfo = MloocCurlPost($post_data, "https://www.lanzoup.com/ajaxm.php?file=" . $ajaxm[1][0], $url);
+	$softInfo = MloocCurlPost($post_data, "https://www.lanzoux.com/".$ajaxm[0][0], $url);
 	$softName[1] = json_decode($softInfo,JSON_UNESCAPED_UNICODE)['inf'];
 } else {
 	//不带密码的链接处理
@@ -84,7 +84,7 @@ if(strstr($softInfo, "function down_p(){") != false) {
 	}
 	$ifurl = "https://www.lanzoup.com/" . $link[1];
 	$softInfo = MloocCurlGet($ifurl);
-	preg_match_all("~'sign':'(.*?)'~", $softInfo, $segment);
+	preg_match_all("~wp_sign = '(.*?)'~", $softInfo, $segment);
 	preg_match_all("/ajaxm\.php\?file=(\d+)/", $softInfo, $ajaxm);
 	$post_data = array(
 			"action" => 'downprocess',
@@ -92,7 +92,7 @@ if(strstr($softInfo, "function down_p(){") != false) {
 			"sign" => $segment[1][0],
 			"kd" => 1
 		);
-	$softInfo = MloocCurlPost($post_data, "https://www.lanzoup.com/ajaxm.php?file=" . $ajaxm[1][0], $ifurl);
+	$softInfo = MloocCurlPost($post_data, "https://www.lanzoux.com/".$ajaxm[0][1], $ifurl);
 }
 //其他情况下的信息输出
 $softInfo = json_decode($softInfo, true);
@@ -111,10 +111,16 @@ $downUrl1 = $softInfo['dom'] . '/file/' . $softInfo['url'];
 //解析最终直链地址
 $downUrl2 = MloocCurlHead($downUrl1,"https://developer.lanzoug.com",$UserAgent,"down_ip=1; expires=Sat, 16-Nov-2019 11:42:54 GMT; path=/; domain=.baidupan.com");
 //判断最终链接是否获取成功，如未成功则使用原链接
-if($downUrl2 == "") {
+if(strpos($downUrl2,"http") === false) {
 	$downUrl = $downUrl1;
 } else {
-	$downUrl = $downUrl2;
+	//2025-03-17 新增后缀自定义功能 https://github.com/hanximeng/LanzouAPI/issues/26
+	if(!empty($_GET['n'])){
+	    preg_match_all("~(.*?)\?fn=(.*?)\\.~", $downUrl2, $rename);
+	    $downUrl = $rename['0']['0'].$_GET['n'];
+	}else{
+	    $downUrl = $downUrl2;
+	}
 }
 //2024-12-03 修复pid参数可能导致的服务器ip地址泄露
 $downUrl=preg_replace('/pid=(.*?.)&/', '', $downUrl);
