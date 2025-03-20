@@ -65,7 +65,7 @@ if(strstr($softInfo, "function down_p(){") != false) {
 					, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
 				);
 	}
-	preg_match_all("~ bcdf = '(.*?)';~", $softInfo, $segment);
+	preg_match_all("~ v3c = '(.*?)';~", $softInfo, $segment);
 	preg_match_all("/ajaxm\.php\?file=(\d+)/", $softInfo, $ajaxm);
 	$post_data = array(
 			"action" => 'downprocess',
