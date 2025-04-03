@@ -2,8 +2,8 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.2.99
- * @Date 2025-03-17
+ * @version 1.3.1
+ * @Date 2025-04-03
  * @link https://hanximeng.com
  */
 header('Access-Control-Allow-Origin:*');
@@ -65,11 +65,11 @@ if(strstr($softInfo, "function down_p(){") != false) {
 					, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
 				);
 	}
-	preg_match_all("~ v3c = '(.*?)';~", $softInfo, $segment);
+	preg_match_all("~'sign':'(.*?)',~", $softInfo, $segment);
 	preg_match_all("/ajaxm\.php\?file=(\d+)/", $softInfo, $ajaxm);
 	$post_data = array(
 			"action" => 'downprocess',
-			"sign" => $segment[1][0],
+			"sign" => $segment[1][1],
 			"p" => $pwd,
 			"kd" => 1
 		);
