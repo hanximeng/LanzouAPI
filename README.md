@@ -26,14 +26,14 @@ pwd:外链密码
 
 ### 直接下载：
 
-无密码：https://api.hanximeng.com/lanzou/?url=https://www.lanzous.com/i6th9cd&type=down
+无密码：https://api.hanximeng.com/lanzou/?url=https://hanximeng.lanzouq.com/iGNHA6th9cd&type=down
 
 有密码：https://api.hanximeng.com/lanzou/?url=https://www.lanzous.com/i42Xxebssfg&type=down&pwd=1234
 
 
 ### 输出直链：
 
-无密码：https://api.hanximeng.com/lanzou/?url=https://www.lanzous.com/i6th9cd
+无密码：https://api.hanximeng.com/lanzou/?url=https://hanximeng.lanzouq.com/iGNHA6th9cd
 
 有密码：https://api.hanximeng.com/lanzou/?url=https://www.lanzous.com/i42Xxebssfg&pwd=1234
 
