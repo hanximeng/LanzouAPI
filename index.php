@@ -2,8 +2,8 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.3.1
- * @Date 2025-04-03
+ * @version 1.3.101
+ * @Date 2025-04-16
  * @link https://hanximeng.com
  */
 header('Access-Control-Allow-Origin:*');
@@ -66,14 +66,15 @@ if(strstr($softInfo, "function down_p(){") != false) {
 				);
 	}
 	preg_match_all("~'sign':'(.*?)',~", $softInfo, $segment);
+	preg_match_all("~ajaxdata = '(.*?)'~", $softInfo, $signs);
 	preg_match_all("/ajaxm\.php\?file=(\d+)/", $softInfo, $ajaxm);
 	$post_data = array(
-			"action" => 'downprocess',
-			"sign" => $segment[1][1],
-			"p" => $pwd,
-			"kd" => 1
-		);
-	$softInfo = MloocCurlPost($post_data, "https://www.lanzoux.com/".$ajaxm[0][0], $url);
+		"action" => "downprocess",
+		"sign" => $segment[1][1],
+		"p" => $pwd,
+		"kd" => 1
+	);
+	$softInfo = MloocCurlPost($post_data, "https://www.lanzoup.com/".$ajaxm[0][0], $url);
 	$softName[1] = json_decode($softInfo,JSON_UNESCAPED_UNICODE)['inf'];
 } else {
 	//不带密码的链接处理
@@ -85,14 +86,18 @@ if(strstr($softInfo, "function down_p(){") != false) {
 	$ifurl = "https://www.lanzoup.com/" . $link[1];
 	$softInfo = MloocCurlGet($ifurl);
 	preg_match_all("~wp_sign = '(.*?)'~", $softInfo, $segment);
+	preg_match_all("~ajaxdata = '(.*?)'~", $softInfo, $signs);
 	preg_match_all("/ajaxm\.php\?file=(\d+)/", $softInfo, $ajaxm);
 	$post_data = array(
-			"action" => 'downprocess',
-			"signs"=>"?ctdf",
-			"sign" => $segment[1][0],
-			"kd" => 1
-		);
-	$softInfo = MloocCurlPost($post_data, "https://www.lanzoux.com/".$ajaxm[0][1], $ifurl);
+		"action" => "downprocess",
+		"websignkey" => $signs[1][0],
+		"signs" => $signs[1][0],
+		"sign" => $segment[1][0],
+		"websign" => '',
+		"kd" => 1,
+		"ves" => 1
+	);
+	$softInfo = MloocCurlPost($post_data, "https://www.lanzoup.com/".$ajaxm[0][1], $ifurl);
 }
 //其他情况下的信息输出
 $softInfo = json_decode($softInfo, true);
