@@ -1,3 +1,4 @@
+# 因个人原因此项目暂停更新，可寻找同类型项目代替
 # LanzouAPI
 <a href="https://github.com/hanximeng/LanzouAPI/archive/refs/heads/master.zip">下载源码</a>
 ## 演示地址：
