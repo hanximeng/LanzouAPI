@@ -24,14 +24,14 @@ pwd:外链密码
 
 ### 直接下载：
 
-无密码：?url=https://hanximeng.lanzouq.com/iGNHA6th9cd&type=down
+无密码：?url=https://www.lanzouq.com/iGNHA6th9cd&type=down
 
 有密码：?url=https://www.lanzous.com/i42Xxebssfg&type=down&pwd=1234
 
 
 ### 输出直链：
 
-无密码：?url=https://hanximeng.lanzouq.com/iGNHA6th9cd
+无密码：?url=https://www.lanzouq.com/iGNHA6th9cd
 
 有密码：?url=https://www.lanzous.com/i42Xxebssfg&pwd=1234
 
@@ -40,5 +40,5 @@ Github或许无法及时回复处理，以下为其余联系方式。
 
 ### Gmail
 hanximeng.com@gmail.com
-### QQ群
-549522943
+
+## 本项目仅供学习交流，项目作者不保证其稳定性，如因站点变动导致无法使用继而对作者进行人身攻击，作者可选择随时停更或删除项目。
