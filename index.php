@@ -117,7 +117,8 @@ if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 		    "ves" => 1
 	    );
 	}
-	$softInfo = MloocCurlPost($post_data, "https://www.lanzouf.com/".$ajaxm[0][1], $ifurl);
+	$ajaxmPath = $ajaxm[0][1] ?? $ajaxm[0][0] ?? '';
+	$softInfo = MloocCurlPost($post_data, "https://www.lanzouf.com/" . $ajaxmPath, $ifurl);
 }
 //其他情况下的信息输出
 $softInfo = json_decode($softInfo, true);
