@@ -135,7 +135,7 @@ if ($softInfo['zt'] != 1) {
 }
 //拼接链接
 $downUrl1 = $softInfo['dom'] . '/file/' . $softInfo['url'];
-$softInfo=MloocCurlGet($downUrl1,$UserAgent,"acw_sc__v2=".$cookie);
+//$softInfo=MloocCurlGet($downUrl1,$UserAgent,"acw_sc__v2=".$cookie);
 //解析最终直链地址
 $downUrl2 = MloocCurlHead($downUrl1,"https://developer.lanzoug.com",$UserAgent,"down_ip=1; expires=Sat, 16-Nov-2019 11:42:54 GMT; path=/; domain=.baidupan.com;acw_sc__v2=".$decrypted);
 //判断最终链接是否获取成功，如未成功则使用原链接
