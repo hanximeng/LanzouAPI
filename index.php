@@ -2,8 +2,8 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.3.107
- * @Date 2026-06-01
+ * @version 1.3.108
+ * @Date 2026-08-16
  * @link https://hanximeng.com
  */
 //屏蔽报错
@@ -15,7 +15,7 @@ $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 $url = isset($_GET['url']) ? $_GET['url'] : "";
 $pwd = isset($_GET['pwd']) ? $_GET['pwd'] : "";
 $type = isset($_GET['type']) ? $_GET['type'] : "";
-$webpage = explode('?',$url)['1'];
+$webpage = parse_url($url, PHP_URL_QUERY);
 //判断传入链接参数是否为空
 if (empty($url)) {
 	die(
@@ -27,10 +27,19 @@ if (empty($url)) {
 	        , JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
 	    );
 }
-//一个简单的链接处理
-$url='https://www.lanzouf.com/'.explode('.com/',$url)['1'];
+//保留分享链接原始域名。蓝奏云的风控 Cookie 与域名关联，强制换域名会导致校验失败。
+$parsedUrl = parse_url($url);
+if (!isset($parsedUrl['scheme'], $parsedUrl['host'], $parsedUrl['path']) ||
+    !in_array(strtolower($parsedUrl['scheme']), array('http', 'https'), true)) {
+	JsonError('URL格式错误');
+}
+$origin = 'https://' . $parsedUrl['host'];
+$url = $origin . $parsedUrl['path'];
+if (!empty($parsedUrl['query'])) {
+	$url .= '?' . $parsedUrl['query'];
+}
 $cookie="";
-$softInfo = MloocCurlGet($url,$UserAgent,"acw_sc__v2=".$cookie);
+$softInfo = MloocCurlGetWithChallenge($url, $UserAgent, $cookie);
 //判断文件链接是否失效
 if (strstr($softInfo, "文件取消分享了") != false) {
 	die(
@@ -57,9 +66,6 @@ if(!isset($softName[1])) {
 if(!isset($softName[1])) {
 	preg_match('~div class="b"><span>(.*?)</span></div>~', $softInfo, $softName);
 }
-if(!empty($webpage)){
-    $softInfo = MloocCurlGet($url.$webpage);
-}
 //带密码的链接的处理
 if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 	if(empty($pwd)) {
@@ -74,14 +80,15 @@ if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 	}
 	preg_match_all("~'sign':'(.*?)',~", $softInfo, $segment);
 	preg_match_all("~ajaxdata = '(.*?)'~", $softInfo, $signs);
-	preg_match_all("/ajaxm\.php\?file=(\d+)/", $softInfo, $ajaxm);
+	preg_match_all("~(?:^|/)(ajax(?:m|file)\.php\?file=\d+)~", $softInfo, $ajaxm);
 	$post_data = array(
 		"action" => "downprocess",
 		"sign" => $segment[1][1],
 		"p" => $pwd,
 		"kd" => 1
 	);
-	$softInfo = MloocCurlPost($post_data, "https://www.lanzouf.com/".$ajaxm[0][0], $url);
+	$ajaxPath = $ajaxm[1][0] ?? '';
+	$softInfo = MloocCurlPost($post_data, $origin."/".$ajaxPath, $url, $UserAgent, "acw_sc__v2=".$cookie);
 	$softName[1] = json_decode($softInfo,JSON_UNESCAPED_UNICODE)['inf'];
 } else {
 	//不带密码的链接处理
@@ -90,11 +97,11 @@ if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 	if(empty($link[1])) {
 		preg_match("~<iframe.*?name=\"[\s\S]*?\"\ssrc=\"\/(.*?)\"~", $softInfo, $link);
 	}
-	$ifurl = "https://www.lanzouf.com/" . $link[1];
+	$ifurl = $origin . "/" . $link[1];
 	if(!empty($webpage)){
 	    preg_match_all("~'sign':'(.*?)'~", $softInfo, $segment);
 	    preg_match_all("~ajaxdata = '(.*?)'~", $softInfo, $signs);
-	    preg_match_all("/ajaxm\.php\?file=(\d+)/", $softInfo, $ajaxm);
+	    preg_match_all("~(?:^|/)(ajax(?:m|file)\.php\?file=\d+)~", $softInfo, $ajaxm);
 	    $post_data = array(
 		    "action" => "downprocess",
 		    "websignkey" => "Em2R",
@@ -104,10 +111,10 @@ if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 		    "ves" => 1
 	    );
 	}else{
-	    $softInfo = MloocCurlGet($ifurl);
+	    $softInfo = MloocCurlGetWithChallenge($ifurl, $UserAgent, $cookie, $url);
 	    preg_match_all("~wp_sign = '(.*?)'~", $softInfo, $segment);
 	    preg_match_all("~ajaxdata = '(.*?)'~", $softInfo, $signs);
-	    preg_match_all("/ajaxm\.php\?file=(\d+)/", $softInfo, $ajaxm);
+	    preg_match_all("~(?:^|/)(ajax(?:m|file)\.php\?file=\d+)~", $softInfo, $ajaxm);
 	    $post_data = array(
 		    "action" => "downprocess",
 		    "websignkey" => $signs[1][0],
@@ -118,8 +125,8 @@ if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 		    "ves" => 1
 	    );
 	}
-	$ajaxmPath = $ajaxm[0][1] ?? $ajaxm[0][0] ?? '';
-	$softInfo = MloocCurlPost($post_data, "https://www.lanzouf.com/".$ajaxmPath, $ifurl,"","acw_sc__v2=".$cookie);
+	$ajaxmPath = $ajaxm[1][0] ?? '';
+	$softInfo = MloocCurlPost($post_data, $origin."/".$ajaxmPath, $ifurl, $UserAgent, "acw_sc__v2=".$cookie);
 }
 //其他情况下的信息输出
 $softInfo = json_decode($softInfo, true);
@@ -137,7 +144,7 @@ if ($softInfo['zt'] != 1) {
 $downUrl1 = $softInfo['dom'] . '/file/' . $softInfo['url'];
 $softInfo=MloocCurlGet($downUrl1,$UserAgent,"acw_sc__v2=".$cookie);
 //解析最终直链地址
-$downUrl2 = MloocCurlHead($downUrl1,"https://developer.lanzoug.com",$UserAgent,"down_ip=1; expires=Sat, 16-Nov-2019 11:42:54 GMT; path=/; domain=.baidupan.com;acw_sc__v2=".$decrypted);
+$downUrl2 = MloocCurlHead($downUrl1, $origin, $UserAgent, "down_ip=1; acw_sc__v2=".$cookie);
 //判断最终链接是否获取成功，如未成功则使用原链接
 if(strpos($downUrl2,"http") === false) {
 	$downUrl = $downUrl1;
@@ -177,14 +184,30 @@ function MloocCurlGetDownUrl($url) {
 	}
 	return "";
 }
+//阿里云 ESA 会先返回 arg1 挑战页。计算 acw_sc__v2 后以同一 UA、Referer 重试。
+function MloocCurlGetWithChallenge($url, $UserAgent, &$cookie, $referer = '') {
+	$response = MloocCurlGet($url, $UserAgent, $cookie === '' ? '' : 'acw_sc__v2='.$cookie, $referer);
+	if (preg_match("~var\\s+arg1=['\"]([0-9a-f]{40})['\"]~i", $response, $match)) {
+		$cookie = acw_sc_v2_simple($match[1]);
+		$response = MloocCurlGet($url, $UserAgent, 'acw_sc__v2='.$cookie, $referer);
+	}
+	return $response;
+}
+//JSON错误输出
+function JsonError($message) {
+	die(json_encode(array('code' => 400, 'msg' => $message), JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+}
 //CURL函数
-function MloocCurlGet($url = '', $UserAgent = '',$cookie = '') {
+function MloocCurlGet($url = '', $UserAgent = '', $cookie = '', $referer = '') {
 	$curl = curl_init();
 	curl_setopt($curl, CURLOPT_URL, $url);
 	curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
 	curl_setopt($curl, CURLOPT_COOKIE , $cookie);
 	if ($UserAgent != "") {
 		curl_setopt($curl, CURLOPT_USERAGENT, $UserAgent);
+	}
+	if ($referer != "") {
+		curl_setopt($curl, CURLOPT_REFERER, $referer);
 	}
 	curl_setopt($curl, CURLOPT_HTTPHEADER, array('X-FORWARDED-FOR:'.Rand_IP(), 'CLIENT-IP:'.Rand_IP()));
 	#关闭SSL
