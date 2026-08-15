@@ -1,0 +1,59 @@
+name: Generate direct-download branch
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: generate-direct-download-branch
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout master
+        uses: actions/checkout@v4
+        with:
+          ref: master
+          fetch-depth: 0
+
+      - name: Generate direct-download entry
+        env:
+          DIRECT_DOWNLOAD_URL: https://daxiaamu.lanzouu.com/ixLqp3xhy4ah
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          path = Path("index.php")
+          source = path.read_text(encoding="utf-8")
+          old = """$url = isset($_GET['url']) ? $_GET['url'] : "";
+          $pwd = isset($_GET['pwd']) ? $_GET['pwd'] : "";
+          $type = isset($_GET['type']) ? $_GET['type'] : "";"""
+          new = f"""// 此分支由 GitHub Actions 自动生成，请勿手动修改。
+          $url = '{os.environ['DIRECT_DOWNLOAD_URL']}';
+          $pwd = "";
+          $type = "down";"""
+
+          if source.count(old) != 1:
+              raise SystemExit("Expected parameter block was not found exactly once in index.php")
+
+          path.write_text(source.replace(old, new), encoding="utf-8", newline="\n")
+          PY
+
+      - name: Publish generated branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --force-create direct-download
+          git add index.php
+          git commit --message "build: generate direct-download branch"
+          git push --force-with-lease origin direct-download
