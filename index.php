@@ -72,16 +72,32 @@ if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 				, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
 			);
 	}
-	preg_match_all("~'sign':'(.*?)',~", $softInfo, $segment);
-	preg_match_all("~ajaxdata = '(.*?)'~", $softInfo, $signs);
+	preg_match("~^[ \t]*data\s*:\s*\{[^\r\n]*['\"]sign['\"]\s*:\s*(?:(['\"])(.*?)\\1|([A-Za-z_$][\w$]*))~m", $softInfo, $signParam);
+	$sign = $signParam[2] ?? '';
+	if($sign === '' && !empty($signParam[3])) {
+		preg_match_all("~var\s+" . preg_quote($signParam[3], "~") . "\s*=\s*(['\"])(.*?)\\1\s*;~", $softInfo, $signValues);
+		$signValues = array_values(array_filter($signValues[2] ?? array(), 'strlen'));
+		$sign = end($signValues);
+	}
 	preg_match_all("/ajaxm\.php\?file=(\d+)/", $softInfo, $ajaxm);
+	$ajaxmPath = $ajaxm[0][0] ?? '';
+	if(empty($sign) || empty($ajaxmPath)) {
+		die(
+			json_encode(
+				array(
+					'code' => 400,
+					'msg' => '未找到密码页 sign 或 ajaxm 参数'
+			    )
+				, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+			);
+	}
 	$post_data = array(
 		"action" => "downprocess",
-		"sign" => $segment[1][1],
+		"sign" => $sign,
 		"p" => $pwd,
 		"kd" => 1
 	);
-	$softInfo = MloocCurlPost($post_data, "https://www.lanzouf.com/".$ajaxm[0][0], $url);
+	$softInfo = MloocCurlPost($post_data, "https://www.lanzouf.com/".$ajaxmPath, $url);
 	$softName[1] = json_decode($softInfo,JSON_UNESCAPED_UNICODE)['inf'];
 } else {
 	//不带密码的链接处理
