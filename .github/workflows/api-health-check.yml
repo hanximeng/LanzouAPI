@@ -1,0 +1,139 @@
+name: API health check
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lanzou-api-health-check
+  cancel-in-progress: true
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TEST_SHARE_URL: https://daxiaamu.lanzouu.com/ixLqp3xhy4ah
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install PHP cURL extension
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes php-cli php-curl
+
+      - name: Start local API
+        id: server
+        continue-on-error: true
+        run: |
+          php -S 127.0.0.1:8080 >api-server.log 2>&1 &
+          echo $! >api-server.pid
+          for attempt in {1..10}; do
+            if curl --silent --output /dev/null http://127.0.0.1:8080/; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "API server did not start"
+          cat api-server.log
+          exit 1
+
+      - name: Check Lanzou parsing
+        id: health
+        if: steps.server.outcome == 'success'
+        continue-on-error: true
+        run: |
+          curl \
+            --fail-with-body \
+            --get \
+            --max-time 60 \
+            --retry 2 \
+            --retry-delay 3 \
+            --data-urlencode "url=${TEST_SHARE_URL}" \
+            --output api-response.json \
+            http://127.0.0.1:8080/
+
+          jq --exit-status '
+            .code == 200 and
+            .msg == "解析成功" and
+            (.downUrl | type == "string" and startswith("http"))
+          ' api-response.json
+
+      - name: Print diagnostics
+        if: always()
+        run: |
+          echo "API response:"
+          if test -f api-response.json; then
+            jq . api-response.json || cat api-response.json
+          else
+            echo "No response file was created."
+          fi
+          echo "Server log:"
+          cat api-server.log || true
+
+      - name: Send failure email
+        if: steps.server.outcome == 'failure' || steps.health.outcome == 'failure'
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          REPOSITORY: ${{ github.repository }}
+          RUN_ID: ${{ github.run_id }}
+          SERVER_URL: ${{ github.server_url }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import smtplib
+          import ssl
+          from email.message import EmailMessage
+          from pathlib import Path
+
+          required = ("SMTP_HOST", "SMTP_USERNAME", "SMTP_PASSWORD", "ALERT_EMAIL")
+          missing = [name for name in required if not os.environ.get(name)]
+          if missing:
+              raise SystemExit("Missing GitHub Secrets: " + ", ".join(missing))
+
+          repository = os.environ["REPOSITORY"]
+          run_url = f'{os.environ["SERVER_URL"]}/{repository}/actions/runs/{os.environ["RUN_ID"]}'
+          response = Path("api-response.json").read_text("utf-8", errors="replace") if Path("api-response.json").exists() else "No API response"
+          log = Path("api-server.log").read_text("utf-8", errors="replace") if Path("api-server.log").exists() else "No server log"
+
+          message = EmailMessage()
+          message["Subject"] = f"[LanzouAPI] API health check failed: {repository}"
+          message["From"] = os.environ.get("SMTP_FROM") or os.environ["SMTP_USERNAME"]
+          message["To"] = os.environ["ALERT_EMAIL"]
+          message.set_content(
+              f"LanzouAPI parsing is unavailable.\n\n"
+              f"Test URL: {os.environ['TEST_SHARE_URL']}\n"
+              f"Actions run: {run_url}\n\n"
+              f"API response:\n{response[:6000]}\n\n"
+              f"Server log:\n{log[:6000]}"
+          )
+
+          host = os.environ["SMTP_HOST"]
+          port = int(os.environ.get("SMTP_PORT") or "465")
+          context = ssl.create_default_context()
+          if port == 465:
+              with smtplib.SMTP_SSL(host, port, context=context, timeout=30) as smtp:
+                  smtp.login(os.environ["SMTP_USERNAME"], os.environ["SMTP_PASSWORD"])
+                  smtp.send_message(message)
+          else:
+              with smtplib.SMTP(host, port, timeout=30) as smtp:
+                  smtp.ehlo()
+                  smtp.starttls(context=context)
+                  smtp.login(os.environ["SMTP_USERNAME"], os.environ["SMTP_PASSWORD"])
+                  smtp.send_message(message)
+          PY
+
+      - name: Mark workflow failed
+        if: steps.server.outcome == 'failure' || steps.health.outcome == 'failure'
+        run: exit 1
