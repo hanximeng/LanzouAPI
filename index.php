@@ -79,14 +79,14 @@ if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 		$signValues = array_values(array_filter($signValues[2] ?? array(), 'strlen'));
 		$sign = end($signValues);
 	}
-	preg_match_all("/ajaxm\.php\?file=(\d+)/", $softInfo, $ajaxm);
+	preg_match_all("/ajax(?:m|file)\.php\?file=(\d+)/", $softInfo, $ajaxm);
 	$ajaxmPath = $ajaxm[0][0] ?? '';
 	if(empty($sign) || empty($ajaxmPath)) {
 		die(
 			json_encode(
 				array(
 					'code' => 400,
-					'msg' => '未找到密码页 sign 或 ajaxm 参数'
+					'msg' => '未找到密码页 sign 或下载接口参数'
 			    )
 				, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
 			);
@@ -110,7 +110,7 @@ if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 	if(!empty($webpage)){
 	    preg_match_all("~'sign':'(.*?)'~", $softInfo, $segment);
 	    preg_match_all("~ajaxdata = '(.*?)'~", $softInfo, $signs);
-	    preg_match_all("/ajaxm\.php\?file=(\d+)/", $softInfo, $ajaxm);
+	    preg_match_all("/ajax(?:m|file)\.php\?file=(\d+)/", $softInfo, $ajaxm);
 	    $post_data = array(
 		    "action" => "downprocess",
 		    "websignkey" => "Em2R",
@@ -123,7 +123,7 @@ if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 	    $softInfo = MloocCurlGet($ifurl);
 	    preg_match_all("~wp_sign = '(.*?)'~", $softInfo, $segment);
 	    preg_match_all("~ajaxdata = '(.*?)'~", $softInfo, $signs);
-	    preg_match_all("/ajaxm\.php\?file=(\d+)/", $softInfo, $ajaxm);
+	    preg_match_all("/ajax(?:m|file)\.php\?file=(\d+)/", $softInfo, $ajaxm);
 	    $post_data = array(
 		    "action" => "downprocess",
 		    "websignkey" => $signs[1][0],
