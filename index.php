@@ -142,7 +142,7 @@ if ($softInfo['zt'] != 1) {
 }
 //拼接链接
 $downUrl1 = $softInfo['dom'] . '/file/' . $softInfo['url'];
-$softInfo=MloocCurlGet($downUrl1,$UserAgent,"acw_sc__v2=".$cookie);
+//$softInfo=MloocCurlGet($downUrl1,$UserAgent,"acw_sc__v2=".$cookie);
 //解析最终直链地址
 $downUrl2 = MloocCurlHead($downUrl1, $origin, $UserAgent, "down_ip=1; acw_sc__v2=".$cookie);
 //判断最终链接是否获取成功，如未成功则使用原链接
