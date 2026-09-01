@@ -2,7 +2,7 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.3.109
+ * @version 1.3.110
  * @Date 2026-09-01
  * @link https://hanximeng.com
  */
@@ -16,8 +16,8 @@ $cacheDir = __DIR__ . '/cache';
 //缓存有效时间（秒）：短时间内的重复请求直接返回缓存结果，避免大量重复请求触发蓝奏风控；设为 0 表示关闭缓存
 //同时作为缓存清理周期：过期缓存会在下次请求经过一个缓存周期后被清理
 $cacheTime = 900;//15分钟
-//缓存密钥：参与缓存 key 的生成，多服务器部署时可防止缓存 key 被模拟/投毒，建议修改为随机字符串
-$cacheSalt = 'Cache_1s5cfsd564vf';
+//缓存密钥：参与缓存 key 的生成，可防止缓存 key 被模拟/投毒，建议修改为随机字符串
+$cacheSalt = 'LanzouAPI_Cache_5e3a9f1c';
 //默认UA
 $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36';
 $url = isset($_GET['url']) ? $_GET['url'] : "";
@@ -108,12 +108,32 @@ if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 				, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
 			);
 	}
-	preg_match_all("~'sign':'(.*?)',~", $softInfo, $segment);
-	preg_match_all("~ajaxdata = '(.*?)'~", $softInfo, $signs);
-	//新版页面改为 var isngis = '...' 存放 sign
-	preg_match_all("~var\s+isngis\s*=\s*'(.*?)'\s*;~", $softInfo, $isngis);
+	//新版页面：data:{...'sign':(字面量|变量)}，行首锚定 data: 可排除 //data 注释中的伪参数
+	preg_match("~^[ \t]*data\s*:\s*\{[^\r\n]*['\"]sign['\"]\s*:\s*(?:(['\"])(.*?)\\1|([A-Za-z_$][\w$]*))~m", $softInfo, $signParam);
+	$sign = isset($signParam[2]) ? $signParam[2] : '';
+	//sign 为变量（如 isngis）时，查找对应的 var 赋值
+	if($sign === '' && !empty($signParam[3])) {
+		preg_match_all("~var\s+" . preg_quote($signParam[3], "~") . "\s*=\s*(['\"])(.*?)\\1\s*;~", $softInfo, $signValues);
+		$signValues = array_values(array_filter(isset($signValues[2]) ? $signValues[2] : array(), 'strlen'));
+		$sign = !empty($signValues) ? end($signValues) : '';
+	}
+	//兼容旧版字面量 sign
+	if($sign === '') {
+		preg_match_all("~'sign':'(.*?)',~", $softInfo, $segment);
+		$sign = isset($segment[1][1]) ? $segment[1][1] : '';
+	}
 	preg_match_all("~(?:^|/)(ajax(?:m|file)\.php\?file=\d+)~", $softInfo, $ajaxm);
-	$sign = !empty($segment[1][1]) ? $segment[1][1] : (!empty($isngis[1]) ? end($isngis[1]) : '');
+	$ajaxPath = isset($ajaxm[1][0]) ? $ajaxm[1][0] : '';
+	if(empty($sign) || empty($ajaxPath)) {
+		die(
+			json_encode(
+				array(
+					'code' => 400,
+					'msg' => '未找到密码页 sign 或下载接口参数'
+			    )
+				, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)
+			);
+	}
 	$post_data = array(
 		"action" => "downprocess",
 		"sign" => $sign,
