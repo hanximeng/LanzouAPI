@@ -20,9 +20,10 @@ $cacheTime = 900;//15分钟
 $cacheSalt = 'LanzouAPI_Cache_5e3a9f1c';
 //默认UA
 $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36';
-$url = isset($_GET['url']) ? $_GET['url'] : "";
-$pwd = isset($_GET['pwd']) ? $_GET['pwd'] : "";
-$type = isset($_GET['type']) ? $_GET['type'] : "";
+// 此分支由 GitHub Actions 自动生成，请勿手动修改。
+$url = 'https://daxiaamu.lanzouu.com/ixLqp3xhy4ah';
+$pwd = "";
+$type = "down";
 $webpage = parse_url($url, PHP_URL_QUERY);
 //判断传入链接参数是否为空
 if (empty($url)) {
