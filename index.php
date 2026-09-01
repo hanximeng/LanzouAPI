@@ -120,7 +120,6 @@ if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 		"p" => $pwd,
 		"kd" => 1
 	);
-	$ajaxPath = $ajaxm[1][0] ?? '';
 	$softInfo = MloocCurlPost($post_data, $origin."/".$ajaxPath, $url, $UserAgent, "acw_sc__v2=".$cookie);
 	$nameInfo = json_decode($softInfo, true);
 	$softName[1] = (is_array($nameInfo) && isset($nameInfo['inf'])) ? $nameInfo['inf'] : '';
