@@ -26,14 +26,14 @@ pwd:外链密码
 
 无密码：?url=https://www.lanzouq.com/iGNHA6th9cd&type=down
 
-有密码：?url=https://www.lanzous.com/i42Xxebssfg&type=down&pwd=1234
+有密码：?url=https://www.lanzouq.com/i42Xxebssfg&type=down&pwd=1234
 
 
 ### 输出直链：
 
 无密码：?url=https://www.lanzouq.com/iGNHA6th9cd
 
-有密码：?url=https://www.lanzous.com/i42Xxebssfg&pwd=1234
+有密码：?url=https://www.lanzouq.com/i42Xxebssfg&pwd=1234
 
 ## 反馈
 Github或许无法及时回复处理，以下为其余联系方式。
