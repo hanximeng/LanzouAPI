@@ -2,7 +2,7 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.4.0
+ * @version 1.4.1
  * @Date 2026-09-25
  * @link https://hanximeng.com
  */
@@ -122,8 +122,12 @@ if(strpos($softInfo, "function down_p(){") !== false  && empty($webpage)) {
 		preg_match_all("~'sign':'(.*?)',~", $softInfo, $segment);
 		$sign = isset($segment[1][1]) ? $segment[1][1] : '';
 	}
-	preg_match_all("~(?:^|/)(ajax(?:m|file)\.php\?file=\d+)~", $softInfo, $ajaxm);
-	$ajaxPath = isset($ajaxm[1][0]) ? $ajaxm[1][0] : '';
+	//下载接口可能是绝对地址（apifile.lanzouw.com），也可能是相对地址，统一补全为绝对地址
+	preg_match_all("~(?:https?://[^/\s]+/)?(ajax(?:m|file)\.php\?file=\d+)~", $softInfo, $ajaxm);
+	$ajaxPath = isset($ajaxm[0][0]) ? $ajaxm[0][0] : '';
+	if ($ajaxPath !== '' && strpos($ajaxPath, 'http') !== 0) {
+		$ajaxPath = $origin . '/' . ltrim($ajaxPath, '/');
+	}
 	if(empty($sign) || empty($ajaxPath)) {
 		die(
 			json_encode(
@@ -140,7 +144,7 @@ if(strpos($softInfo, "function down_p(){") !== false  && empty($webpage)) {
 		"p" => $pwd,
 		"kd" => 1
 	);
-	$softInfo = MloocCurlPost($post_data, $origin."/".$ajaxPath, $url, $UserAgent, "acw_sc__v2=".$cookie);
+	$softInfo = MloocCurlPost($post_data, $ajaxPath, $url, $UserAgent, "acw_sc__v2=".$cookie);
 	$nameInfo = json_decode($softInfo, true);
 	$softName[1] = (is_array($nameInfo) && isset($nameInfo['inf'])) ? $nameInfo['inf'] : '';
 } else {
