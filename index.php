@@ -2,8 +2,8 @@
 /**
  * @package Lanzou
  * @author Filmy,hanximeng
- * @version 1.3.110
- * @Date 2026-09-01
+ * @version 1.4.0
+ * @Date 2026-09-25
  * @link https://hanximeng.com
  */
 //屏蔽报错
@@ -15,8 +15,8 @@ header('Content-Type:application/json; charset=utf-8');
 $cacheDir = __DIR__ . '/cache';
 //缓存有效时间（秒）：短时间内的重复请求直接返回缓存结果，避免大量重复请求触发蓝奏风控；设为 0 表示关闭缓存
 //同时作为缓存清理周期：过期缓存会在下次请求经过一个缓存周期后被清理
-$cacheTime = 900;//15分钟
-//缓存密钥：参与缓存 key 的生成，可防止缓存 key 被模拟/投毒，建议修改为随机字符串
+$cacheTime = 900;
+//缓存密钥：参与缓存 key 的生成，多服务器部署时可防止缓存 key 被模拟/投毒，建议修改为随机字符串
 $cacheSalt = 'LanzouAPI_Cache_5e3a9f1c';
 //默认UA
 $UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36';
@@ -59,7 +59,7 @@ if ($cached !== false) {
 	    json_encode(
 	        array(
 	            'code' => 200,
-	            'msg' => '解析成功（缓存结果）',
+	            'msg' => '解析成功',
 	            'name' => isset($cached['name']) ? $cached['name'] : "",
 	            'filesize' => isset($cached['filesize']) ? $cached['filesize'] : "",
 	            'downUrl' => isset($cached['downUrl']) ? $cached['downUrl'] : "",
@@ -97,7 +97,7 @@ if(!isset($softName[1])) {
 	preg_match('~div class="b"><span>(.*?)</span></div>~', $softInfo, $softName);
 }
 //带密码的链接的处理
-if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
+if(strpos($softInfo, "function down_p(){") !== false  && empty($webpage)) {
 	if(empty($pwd)) {
 		die(
 			json_encode(
@@ -154,7 +154,7 @@ if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 	if(!empty($webpage)){
 	    preg_match_all("~'sign':'(.*?)'~", $softInfo, $segment);
 	    preg_match_all("~ajaxdata = '(.*?)'~", $softInfo, $signs);
-	    preg_match_all("~(?:^|/)(ajax(?:m|file)\.php\?file=\d+)~", $softInfo, $ajaxm);
+	    preg_match_all("~(?:https?://[^/\s]+/)?(ajax(?:m|file)\.php\?file=\d+)~", $softInfo, $ajaxm);
 	    $post_data = array(
 		    "action" => "downprocess",
 		    "websignkey" => "Em2R",
@@ -164,10 +164,13 @@ if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 		    "ves" => 1
 	    );
 	}else{
+	    if(empty($link[1])) {
+		    JsonError('未找到下载入口，请检查链接是否有效');
+	    }
 	    $softInfo = MloocCurlGetWithChallenge($ifurl, $UserAgent, $cookie, $url);
 	    preg_match_all("~wp_sign = '(.*?)'~", $softInfo, $segment);
 	    preg_match_all("~ajaxdata = '(.*?)'~", $softInfo, $signs);
-	    preg_match_all("~(?:^|/)(ajax(?:m|file)\.php\?file=\d+)~", $softInfo, $ajaxm);
+	    preg_match_all("~(?:https?://[^/\s]+/)?(ajax(?:m|file)\.php\?file=\d+)~", $softInfo, $ajaxm);
 	    $post_data = array(
 		    "action" => "downprocess",
 		    "websignkey" => $signs[1][0],
@@ -178,8 +181,12 @@ if(strpos($softInfo, "function down_p(){") != false  && empty($webpage)) {
 		    "ves" => 1
 	    );
 	}
-	$ajaxmPath = $ajaxm[1][0] ?? '';
-	$softInfo = MloocCurlPost($post_data, $origin."/".$ajaxmPath, $ifurl, $UserAgent, "acw_sc__v2=".$cookie);
+	//下载接口可能是绝对地址（apifile.lanzouw.com），也可能是相对地址，统一补全为绝对地址
+	$ajaxmPath = $ajaxm[0][0] ?? '';
+	if ($ajaxmPath !== '' && strpos($ajaxmPath, 'http') !== 0) {
+		$ajaxmPath = $origin . '/' . ltrim($ajaxmPath, '/');
+	}
+	$softInfo = MloocCurlPost($post_data, $ajaxmPath, $ifurl, $UserAgent, "acw_sc__v2=".$cookie);
 }
 //其他情况下的信息输出
 $decoded = json_decode($softInfo, true);
@@ -197,17 +204,15 @@ if (!is_array($decoded) || !isset($decoded['zt']) || $decoded['zt'] != 1) {
 $softInfo = $decoded;
 //拼接链接
 $downUrl1 = $softInfo['dom'] . '/file/' . $softInfo['url'];
-$softInfo=MloocCurlGet($downUrl1,$UserAgent,"acw_sc__v2=".$cookie);
-//解析最终直链地址
-$downUrl2 = MloocCurlHead($downUrl1, $origin, $UserAgent, "down_ip=1; acw_sc__v2=".$cookie);
+//解析最终直链地址：蓝奏云 CDN 对缺少浏览器特征的请求会先返回 ESA 挑战页，需带上浏览器请求头并算出 acw_sc__v2 后重试
+$downUrl2 = MloocCurlHead($downUrl1, $UserAgent);
 //判断最终链接是否获取成功，如未成功则使用原链接
 if(strpos($downUrl2,"http") === false) {
 	$downUrl = $downUrl1;
 } else {
 	//2025-03-17 新增后缀自定义功能 https://github.com/hanximeng/LanzouAPI/issues/26
 	if(!empty($_GET['n'])){
-	    preg_match_all("~(.*?)\?fn=(.*?)\\.~", $downUrl2, $rename);
-	    $downUrl = (isset($rename['0']['0']) && $rename['0']['0'] !== '') ? $rename['0']['0'].$_GET['n'] : $downUrl2;
+	    $downUrl = ReplaceUrlSuffix($downUrl2, $_GET['n']);
 	}else{
 	    $downUrl = $downUrl2;
 	}
@@ -237,13 +242,77 @@ if ($type != "down") {
 	header("Location:$downUrl");
 	die;
 }
-//获取下载链接函数
-function MloocCurlGetDownUrl($url) {
-	$header = get_headers($url,1);
-	if(isset($header['Location'])) {
-		return $header['Location'];
+//直链解析函数：蓝奏云 CDN 会先返回 ESA 挑战页，需按浏览器特征请求并算出 acw_sc__v2 重试，
+//302 响应中的 Location 才是最终直链（因此不能开启自动跳转，否则会直接下载整个文件）
+function MloocCurlHead($url, $UserAgent) {
+	$cookies = array();
+	$headers = array(
+		'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+		'Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+		'Cache-Control: max-age=0',
+		'Upgrade-Insecure-Requests: 1',
+		'X-Requested-With: mark.via'
+	);
+	//挑战页也可能需要重试多次，最多请求 3 次
+	for ($i = 0; $i < 3; $i++) {
+		$location = '';
+		$curl = curl_init();
+		curl_setopt($curl, CURLOPT_URL, $url);
+		curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($curl, CURLOPT_USERAGENT, $UserAgent);
+		curl_setopt($curl, CURLOPT_ENCODING, 'gzip, deflate');
+		if (!empty($cookies)) {
+			$pairs = array();
+			foreach ($cookies as $name => $value) {
+				$pairs[] = $name . '=' . $value;
+			}
+			curl_setopt($curl, CURLOPT_COOKIE, implode('; ', $pairs));
+		}
+		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+		//超时设置，默认为10秒
+		curl_setopt($curl, CURLOPT_TIMEOUT, 10);
+		curl_setopt($curl, CURLOPT_HEADERFUNCTION, function ($curl, $header) use (&$location, &$cookies) {
+			$pos = strpos($header, ':');
+			if ($pos === false) {
+				return strlen($header);
+			}
+			$name = strtolower(trim(substr($header, 0, $pos)));
+			$value = trim(substr($header, $pos + 1));
+			if ($name === 'location' && $location === '') {
+				$location = $value;
+			} elseif ($name === 'set-cookie') {
+				$pair = explode('=', explode(';', $value)[0], 2);
+				if (count($pair) === 2) {
+					$cookies[trim($pair[0])] = trim($pair[1]);
+				}
+			}
+			return strlen($header);
+		});
+		$response = curl_exec($curl);
+		curl_close($curl);
+		if ($location !== '') {
+			return $location;
+		}
+		//挑战页：从 var arg1 算出 acw_sc__v2 后带上 Cookie 重试
+		if (preg_match("~var\\s+arg1=['\"]([0-9a-f]{40})['\"]~i", (string)$response, $match)) {
+			$cookies['acw_sc__v2'] = acw_sc_v2_simple($match[1]);
+			continue;
+		}
+		break;
 	}
-	return "";
+	return '';
+}
+//2025-03-17 新增后缀自定义功能 https://github.com/hanximeng/LanzouAPI/issues/26
+//新版直链形如 https://xxx/file/xxx.txt?sg=...&fileName=xxx.txt，其中 sg 签名包含路径，改路径会 403，
+//因此只替换查询参数中的文件名扩展名（新版 fileName、旧版 fn）
+function ReplaceUrlSuffix($url, $suffix) {
+	$suffix = ltrim($suffix, '.');
+	return preg_replace_callback('~(fileName|fn)=([^&]*)~', function ($match) use ($suffix) {
+		$value = preg_replace('~\\.[A-Za-z0-9]+$~', '', rawurldecode($match[2])) . '.' . $suffix;
+		return $match[1] . '=' . rawurlencode($value);
+	}, $url, 1);
 }
 //阿里云 ESA 会先返回 arg1 挑战页。计算 acw_sc__v2 后以同一 UA、Referer 重试。
 function MloocCurlGetWithChallenge($url, $UserAgent, &$cookie, $referer = '') {
@@ -303,41 +372,6 @@ function MloocCurlPost($post_data = '', $url = '', $ifurl = '', $UserAgent = '',
 	curl_setopt($curl, CURLOPT_POSTFIELDS, $post_data);
 	$response = curl_exec($curl);
 	return $response;
-}
-//直链解析函数
-function MloocCurlHead($url,$guise,$UserAgent,$cookie) {
-	$headers = array(
-		'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-		'Accept-Encoding: gzip, deflate',
-		'Accept-Language: zh-CN,zh;q=0.9',
-		'Cache-Control: no-cache',
-		'Connection: keep-alive',
-		'Pragma: no-cache',
-		'Upgrade-Insecure-Requests: 1',
-		'User-Agent: '.$UserAgent
-	);
-	$curl = curl_init();
-	curl_setopt($curl, CURLOPT_URL, $url);
-	curl_setopt($curl, CURLOPT_HTTPHEADER,$headers);
-	curl_setopt($curl, CURLOPT_REFERER, $guise);
-	curl_setopt($curl, CURLOPT_COOKIE , $cookie);
-	curl_setopt($curl, CURLOPT_USERAGENT, $UserAgent);
-	//优先用 HEAD 请求获取跳转地址，避免下载整个文件
-	curl_setopt($curl, CURLOPT_NOBODY, 1);
-	curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-	curl_setopt($curl, CURLINFO_HEADER_OUT, TRUE);
-	curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-	//超时设置，默认为10秒
-	curl_setopt($curl, CURLOPT_TIMEOUT, 10);
-	curl_exec($curl);
-	$redirectUrl = curl_getinfo($curl, CURLINFO_REDIRECT_URL);
-	//部分 CDN 对 HEAD 请求不返回跳转地址，回退为 GET
-	if (empty($redirectUrl)) {
-		curl_setopt($curl, CURLOPT_NOBODY, 0);
-		curl_exec($curl);
-		$redirectUrl = curl_getinfo($curl, CURLINFO_REDIRECT_URL);
-	}
-	return $redirectUrl;
 }
 //随机IP函数
 function Rand_IP() {
