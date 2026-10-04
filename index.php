@@ -154,9 +154,10 @@ if(strpos($softInfo, "function down_p(){") !== false  && empty($webpage)) {
 	if(empty($link[1])) {
 		preg_match("~<iframe.*?name=\"[\s\S]*?\"\ssrc=\"\/(.*?)\"~", $softInfo, $link);
 	}
-	$ifurl = $origin . "/" . $link[1];
-	if(!empty($webpage)){
-	    preg_match_all("~'sign':'(.*?)'~", $softInfo, $segment);
+	$ifurl = $origin . "/" . (isset($link[1]) ? $link[1] : '');
+	//带 query 的链接（旧版直链页）：页面里已直接给出 sign/ajaxdata，无需再请求 iframe
+	preg_match_all("~'sign':'(.*?)'~", $softInfo, $segment);
+	if(!empty($webpage) && !empty($segment[1][1])){
 	    preg_match_all("~ajaxdata = '(.*?)'~", $softInfo, $signs);
 	    preg_match_all("~(?:https?://[^/\s]+/)?(ajax(?:m|file)\.php\?file=\d+)~", $softInfo, $ajaxm);
 	    $post_data = array(
@@ -175,11 +176,16 @@ if(strpos($softInfo, "function down_p(){") !== false  && empty($webpage)) {
 	    preg_match_all("~wp_sign = '(.*?)'~", $softInfo, $segment);
 	    preg_match_all("~ajaxdata = '(.*?)'~", $softInfo, $signs);
 	    preg_match_all("~(?:https?://[^/\s]+/)?(ajax(?:m|file)\.php\?file=\d+)~", $softInfo, $ajaxm);
+	    $softSign = isset($segment[1][0]) ? $segment[1][0] : '';
+	    $softWebsign = isset($signs[1][0]) ? $signs[1][0] : '';
+	    if($softSign === '') {
+		    JsonError('未找到下载接口参数，请检查链接是否有效');
+	    }
 	    $post_data = array(
 		    "action" => "downprocess",
-		    "websignkey" => $signs[1][0],
-		    "signs" => $signs[1][0],
-		    "sign" => $segment[1][0],
+		    "websignkey" => $softWebsign,
+		    "signs" => $softWebsign,
+		    "sign" => $softSign,
 		    "websign" => '',
 		    "kd" => 1,
 		    "ves" => 1
@@ -253,7 +259,13 @@ function MloocCurlHead($url, $UserAgent) {
 	$headers = array(
 		'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
 		'Accept-Language: zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7',
-		'Cache-Control: max-age=0',
+		'sec-ch-ua: "Not(A:Brand";v="8", "Chromium";v="144"',
+		'sec-ch-ua-mobile: ?0',
+		'sec-ch-ua-platform: "Windows"',
+		'Sec-Fetch-Dest: document',
+		'Sec-Fetch-Mode: navigate',
+		'Sec-Fetch-Site: cross-site',
+		'Sec-Fetch-User: ?1',
 		'Upgrade-Insecure-Requests: 1',
 		'X-Requested-With: mark.via'
 	);
@@ -295,7 +307,6 @@ function MloocCurlHead($url, $UserAgent) {
 			return strlen($header);
 		});
 		$response = curl_exec($curl);
-		curl_close($curl);
 		if ($location !== '') {
 			return $location;
 		}
